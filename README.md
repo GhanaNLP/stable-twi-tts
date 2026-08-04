@@ -14,16 +14,16 @@ Two things it does that a generic TTS wrapper doesn't:
   couldn't pronounce.
 
 ```bash
-pip install ghana-tts
+pip install twi-ipa-tts
 apt install espeak-ng                      # needed for English
-pip install 'ghana-tts[twi]'               # needed for Twi
+pip install 'twi-ipa-tts[twi]'               # needed for Twi
 ```
 
 ## Speak something
 
 ```bash
-ghana-tts --model voices/twi-ipa --text "Akwaaba, wo ho te sɛn?" --out hello.wav
-ghana-tts --model voices/twi-ipa --language eng --text "Good morning, Accra." --out en.wav
+twi-ipa-tts --model voices/twi-ipa --text "Akwaaba, wo ho te sɛn?" --out hello.wav
+twi-ipa-tts --model voices/twi-ipa --language eng --text "Good morning, Accra." --out en.wav
 ```
 
 ## Two ways to say an English word
@@ -32,11 +32,11 @@ Text containing English can be handled either way, and neither is universally ri
 
 ```bash
 # native: pronounce the English as English
-ghana-tts --model voices/twi-ipa --language mixed --english-mode native \
+twi-ipa-tts --model voices/twi-ipa --language mixed --english-mode native \
     --text "Mepɛ sɛ mesua [computer science] wɔ [University of Ghana]." --out native.wav
 
 # adapt: respell it in Twi and pronounce it as Twi
-ghana-tts --model voices/twi-ipa --language mixed --english-mode adapt \
+twi-ipa-tts --model voices/twi-ipa --language mixed --english-mode adapt \
     --text "Mepɛ sɛ mesua [computer science] wɔ [University of Ghana]." --out adapt.wav
 ```
 
@@ -56,7 +56,7 @@ adapt   m e pʰ ɛ s ɛ m e s u a  kʰ ɔ m pʰ u tʰ a  s a j e n s e  w ɔ  j 
 
 `adapt` uses [en-twi-pronouncer](https://github.com/GhanaNLP/en-twi-pronouncer) — a 39,692-word
 lexicon of established Twi borrowing forms, with deterministic rules for anything unlisted. It
-works offline and needs no API. Install it with `pip install 'ghana-tts[adapt]'`.
+works offline and needs no API. Install it with `pip install 'twi-ipa-tts[adapt]'`.
 
 Because adapted output contains **no English phonemes at all**, `adapt` also works on a
 Twi-only model. `--strict-adapt` restricts it to curated lexicon entries and leaves unknown
@@ -66,16 +66,16 @@ In `native` mode, `[bracketed]` spans mark the English. In `adapt` mode the brac
 optional — English words are detected by spelling and lexicon lookup.
 
 ```python
-from ghana_tts import GhanaTTS
+from twi_ipa_tts import TwiIpaTTS
 
-tts = GhanaTTS("voices/twi-ipa")
+tts = TwiIpaTTS("voices/twi-ipa")
 tts.synthesize("Akwaaba, wo ho te sɛn?", voice="twi-1").save("hello.wav")
 ```
 
 ## Choosing a voice
 
 ```bash
-ghana-tts --model voices/twi-ipa --list-voices
+twi-ipa-tts --model voices/twi-ipa --list-voices
 ```
 
 ```
@@ -107,7 +107,7 @@ extrapolation and will sound less settled than `eng-1`.
 Any of `.txt` (one utterance per line), `.csv`/`.tsv` (needs a `text` column), or `.jsonl`.
 
 ```bash
-ghana-tts --model voices/twi-ipa --input corpus.csv --out synth/ --workers 8
+twi-ipa-tts --model voices/twi-ipa --input corpus.csv --out synth/ --workers 8
 ```
 
 ```
