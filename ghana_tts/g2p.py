@@ -39,11 +39,20 @@ def tokenize(ipa: str, symbols) -> list[str]:
     Longest-first matters: several symbols are multi-character (the English diphthongs aɪ aʊ
     ɔɪ eɪ oʊ, and Twi's kʰ, t͡ʃ, k͡p, hʷ). Splitting by codepoint would shatter them into
     units the model has never seen.
+
+    Whitespace is skipped rather than emitted, even though the model does have a symbol for a
+    space. The English training targets were tokenised with the space symbol excluded, so
+    emitting word boundaries here would feed the model sequences unlike anything it trained
+    on. It also cannot survive serialisation: a space-separated phoneme string has no way to
+    represent a phoneme that *is* a space.
     """
-    order = sorted(symbols, key=len, reverse=True)
+    order = sorted([s for s in symbols if s.strip()], key=len, reverse=True)
     out: list[str] = []
     i = 0
     while i < len(ipa):
+        if ipa[i].isspace():
+            i += 1
+            continue
         for s in order:
             if ipa.startswith(s, i):
                 out.append(s)
