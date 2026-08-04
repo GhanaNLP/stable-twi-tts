@@ -1,4 +1,4 @@
-# ghana-tts
+# twi-ipa-tts
 
 Speech synthesis for **Twi** and **Ghanaian English**, running on ONNX — a ~50 MB dependency
 instead of a ~2 GB PyTorch install, many times realtime on a laptop CPU, and portable to Linux,
@@ -22,29 +22,60 @@ pip install 'ghana-tts[twi]'               # needed for Twi
 ## Speak something
 
 ```bash
-ghana-tts --model voices/gh-bilingual --text "Akwaaba, wo ho te sɛn?" --out hello.wav
-ghana-tts --model voices/gh-bilingual --language eng --text "Good morning, Accra." --out en.wav
+ghana-tts --model voices/twi-ipa --text "Akwaaba, wo ho te sɛn?" --out hello.wav
+ghana-tts --model voices/twi-ipa --language eng --text "Good morning, Accra." --out en.wav
 ```
 
-Code-switched text — `[bracketed]` spans are read as English inside a Twi frame, which is how
-Ghanaian speech actually mixes:
+## Two ways to say an English word
+
+Text containing English can be handled either way, and neither is universally right:
 
 ```bash
-ghana-tts --model voices/gh-bilingual --language mixed \
-    --text "Mepɛ sɛ mesua [computer science] wɔ [university] hɔ." --out mixed.wav
+# native: pronounce the English as English
+ghana-tts --model voices/twi-ipa --language mixed --english-mode native \
+    --text "Mepɛ sɛ mesua [computer science] wɔ [University of Ghana]." --out native.wav
+
+# adapt: respell it in Twi and pronounce it as Twi
+ghana-tts --model voices/twi-ipa --language mixed --english-mode adapt \
+    --text "Mepɛ sɛ mesua [computer science] wɔ [University of Ghana]." --out adapt.wav
 ```
+
+The same sentence, phonemised both ways:
+
+```
+native  m e pʰ ɛ s ɛ m e s u a  k ə m p j ˈuː ɾ ɚ  s ˈaɪ ə n s  w ɔ  j ˌuː n ɪ v ˈɜː s ᵻ ɾ i  …
+adapt   m e pʰ ɛ s ɛ m e s u a  kʰ ɔ m pʰ u tʰ a  s a j e n s e  w ɔ  j u n ɪ b ɛ s ɪ tʰ ɪ  …
+```
+
+| | `native` | `adapt` |
+|---|---|---|
+| pronunciation | Ghanaian-accented English | Twi, as a loanword |
+| `computer` | `k ə m p j uː ɾ ɚ` | `kʰ ɔ m pʰ u tʰ a` (*kɔmputa*) |
+| needs | a model trained on English audio | nothing — output is pure Twi phonemes |
+| right for | names, quotations, unfamiliar English | established loanwords: *sukuu*, *asɔpiti*, *pɔlisi* |
+
+`adapt` uses [en-twi-pronouncer](https://github.com/GhanaNLP/en-twi-pronouncer) — a 39,692-word
+lexicon of established Twi borrowing forms, with deterministic rules for anything unlisted. It
+works offline and needs no API. Install it with `pip install 'ghana-tts[adapt]'`.
+
+Because adapted output contains **no English phonemes at all**, `adapt` also works on a
+Twi-only model. `--strict-adapt` restricts it to curated lexicon entries and leaves unknown
+words alone, for when a wrong pronunciation is worse than an unadapted word.
+
+In `native` mode, `[bracketed]` spans mark the English. In `adapt` mode the brackets are
+optional — English words are detected by spelling and lexicon lookup.
 
 ```python
 from ghana_tts import GhanaTTS
 
-tts = GhanaTTS("voices/gh-bilingual")
+tts = GhanaTTS("voices/twi-ipa")
 tts.synthesize("Akwaaba, wo ho te sɛn?", voice="twi-1").save("hello.wav")
 ```
 
 ## Choosing a voice
 
 ```bash
-ghana-tts --model voices/gh-bilingual --list-voices
+ghana-tts --model voices/twi-ipa --list-voices
 ```
 
 ```
@@ -76,7 +107,7 @@ extrapolation and will sound less settled than `eng-1`.
 Any of `.txt` (one utterance per line), `.csv`/`.tsv` (needs a `text` column), or `.jsonl`.
 
 ```bash
-ghana-tts --model voices/gh-bilingual --input corpus.csv --out synth/ --workers 8
+ghana-tts --model voices/twi-ipa --input corpus.csv --out synth/ --workers 8
 ```
 
 ```
@@ -142,9 +173,9 @@ import sherpa_onnx
 tts = sherpa_onnx.OfflineTts(sherpa_onnx.OfflineTtsConfig(
     model=sherpa_onnx.OfflineTtsModelConfig(
         vits=sherpa_onnx.OfflineTtsVitsModelConfig(
-            model="voices/gh-bilingual/model.onnx",
-            tokens="voices/gh-bilingual/tokens.txt",
-            lexicon="voices/gh-bilingual/lexicon.txt",
+            model="voices/twi-ipa/model.onnx",
+            tokens="voices/twi-ipa/tokens.txt",
+            lexicon="voices/twi-ipa/lexicon.txt",
         ))))
 audio = tts.generate("Akwaaba", sid=0)
 ```
@@ -161,7 +192,7 @@ python tools/export_voice.py \
     --checkpoint runs/piper/checkpoints/best.ckpt \
     --train-config runs/piper/config.json \
     --manifest data/manifest.tsv \
-    --out voices/gh-bilingual \
+    --out voices/twi-ipa \
     --top-n 10 --min-hours 1.0 --lexicon
 ```
 

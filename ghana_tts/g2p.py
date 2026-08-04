@@ -114,10 +114,62 @@ def mixed_phonemes(text: str, symbols, dialect: str = "Asante Twi") -> list[str]
     return units
 
 
-def phonemize(text: str, language: str, symbols, dialect: str = "Asante Twi") -> list[str]:
+@lru_cache(maxsize=2)
+def _lexicon(path: str | None):
+    try:
+        from twi_adapt import Lexicon
+    except ImportError as e:
+        raise PhonemeError(
+            "english_mode='adapt' needs the adaptation lexicon. Install with:\n"
+            "  pip install 'ghana-tts[adapt]'\n"
+            "or: pip install git+https://github.com/GhanaNLP/en-twi-pronouncer"
+        ) from e
+    return Lexicon.load(path) if path else Lexicon.load()
+
+
+def adapt_then_twi(text: str, dialect: str = "Asante Twi",
+                   lexicon_path: str | None = None, strict: bool = False) -> list[str]:
+    """Respell English words in Twi orthography, then phonemise the whole thing as Twi.
+
+    The result contains only Twi phonemes, so a Twi voice pronounces the English words the way
+    a Twi speaker would — `university` as `yunibɛsiti`, `school` as `sukuu`. That is usually
+    what you want for established loanwords, and it avoids asking a voice for phonemes its
+    speaker never produced in training.
+    """
+    from twi_adapt import adapt_text
+
+    lex = _lexicon(lexicon_path)
+    adapted = adapt_text(text, lex, use_rules=not strict).text
+    # Brackets are code-switch markers for the native path; they are meaningless once every
+    # word is Twi, and would otherwise be read as punctuation.
+    return twi_phonemes(adapted.replace("[", "").replace("]", ""), dialect)
+
+
+def phonemize(text: str, language: str, symbols, dialect: str = "Asante Twi",
+              english_mode: str = "native", lexicon_path: str | None = None,
+              strict_adapt: bool = False) -> list[str]:
+    """Text to phoneme units.
+
+    english_mode chooses how English words are handled:
+
+      native  pronounce them as English, using the model's English phonemes. Needs a model
+              trained on English audio, and the result is Ghanaian-accented English.
+      adapt   respell them in Twi orthography and pronounce them as Twi. Works on a Twi-only
+              model, and matches how loanwords are actually said in Twi.
+
+    Neither is universally right: `adapt` is correct for `sukuu` and wrong if you specifically
+    wanted an English pronunciation of a name.
+    """
+    if english_mode not in ("native", "adapt"):
+        raise PhonemeError(f"english_mode must be 'native' or 'adapt', got {english_mode!r}")
+
+    if english_mode == "adapt":
+        # Every language collapses to the Twi path, because adaptation removes the English.
+        return adapt_then_twi(text, dialect, lexicon_path, strict_adapt)
+
     if language == "twi":
-        return twi_phonemes(text, dialect) if not SPAN_RE.search(text) else \
-            mixed_phonemes(text, symbols, dialect)
+        return (mixed_phonemes(text, symbols, dialect) if SPAN_RE.search(text)
+                else twi_phonemes(text, dialect))
     if language == "eng":
         return english_phonemes(text, symbols)
     if language == "mixed":

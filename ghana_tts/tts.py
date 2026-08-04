@@ -95,17 +95,27 @@ class GhanaTTS:
     def synthesize(self, text: str, voice: str | int | Voice | None = None,
                    language: str = "twi", length_scale: float = 1.0,
                    noise_scale: float = 0.667, noise_w: float = 0.8,
-                   split_long: bool = True, pause: float = 0.20) -> Synthesis:
+                   split_long: bool = True, pause: float = 0.20,
+                   english_mode: str = "native", lexicon_path: str | None = None,
+                   strict_adapt: bool = False) -> Synthesis:
         """Speak `text`.
 
         language: "twi", "eng", or "mixed" for code-switched text where [bracketed] spans are
         English. length_scale > 1 slows speech down; noise_scale and noise_w control how much
         prosodic variation the model samples.
+
+        english_mode decides what happens to English words:
+          "native"  pronounced as English, using the model's English phonemes
+          "adapt"   respelled in Twi orthography and pronounced as Twi (university ->
+                    yunibɛsiti), which needs no English phonemes at all
         """
         if isinstance(voice, Voice):
             v = voice
         elif voice is None:
-            v = self.voices.default("twi" if language == "mixed" else language)
+            # Adapted text is entirely Twi phonemes, so a Twi voice is the right default even
+            # when the source language was English.
+            want = "twi" if (language == "mixed" or english_mode == "adapt") else language
+            v = self.voices.default(want)
         else:
             v = self.voices.get(voice)
 
@@ -116,10 +126,14 @@ class GhanaTTS:
         pieces, n_ph = [], 0
         gap = np.zeros(int(pause * self.sample_rate), dtype=np.float32)
         for i, chunk in enumerate(chunks):
-            units = phonemize(chunk, language, self.symbols)
+            units = phonemize(chunk, language, self.symbols, english_mode=english_mode,
+                              lexicon_path=lexicon_path, strict_adapt=strict_adapt)
             if not units:
                 continue
-            ids = to_ids(units, self.id_map, language)
+            # Adapted text is Twi phonemes, so it must carry the Twi language token even when
+            # the source text was English. Tagging it "eng" would ask the model to read Twi
+            # phonemes in an English frame, which it never saw.
+            ids = to_ids(units, self.id_map, "twi" if english_mode == "adapt" else language)
             n_ph += len(units)
             pieces.append(self._forward(ids, v.speaker_id, length_scale, noise_scale,
                                         noise_w))

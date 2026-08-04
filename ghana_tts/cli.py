@@ -63,6 +63,14 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--noise-scale", type=float, default=0.667)
     ap.add_argument("--noise-w", type=float, default=0.8)
     ap.add_argument("--threads", type=int, default=None, help="onnxruntime intra-op threads")
+    ap.add_argument("--english-mode", default="native", choices=["native", "adapt"],
+                    help="native: pronounce English words as English (needs a model trained on "
+                         "English audio). adapt: respell them in Twi orthography and pronounce "
+                         "them as Twi (university -> yunibesiti), which needs no English phonemes")
+    ap.add_argument("--lexicon", default=None,
+                    help="adaptation lexicon; defaults to the one shipped with en-twi-pronouncer")
+    ap.add_argument("--strict-adapt", action="store_true",
+                    help="adapt only words in the lexicon; never fall back to rules")
 
     g = ap.add_mutually_exclusive_group()
     g.add_argument("--text", help="one utterance")
@@ -87,7 +95,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     common = dict(language=args.language, length_scale=args.length_scale,
-                  noise_scale=args.noise_scale, noise_w=args.noise_w)
+                  noise_scale=args.noise_scale, noise_w=args.noise_w,
+                  english_mode=args.english_mode, lexicon_path=args.lexicon,
+                  strict_adapt=args.strict_adapt)
 
     if args.text:
         s = tts.synthesize(args.text, voice=args.voice, **common)
