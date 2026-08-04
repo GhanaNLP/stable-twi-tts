@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+voices/
+synth/
+*.onnx
+*.wav
+build/
+dist/
+*.egg-info/

@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ghana-tts"
+version = "0.1.0"
+description = "Twi and Ghanaian English speech synthesis on ONNX"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+dependencies = [
+    "onnxruntime>=1.16",
+    "numpy>=1.21",
+]
+
+[project.optional-dependencies]
+# Twi needs ghana-g2p. Its own wheel build is currently broken upstream (africa-g2p ships
+# data/ twice, so hatchling refuses the archive), hence the direct git references.
+twi = [
+    "africa-g2p @ git+https://github.com/AfriSpeech/africa-g2p",
+    "ghana-g2p @ git+https://github.com/GhanaNLP/ghana-g2p",
+]
+
+[project.scripts]
+ghana-tts = "ghana_tts.cli:main"
+
+[tool.setuptools]
+packages = ["ghana_tts"]
