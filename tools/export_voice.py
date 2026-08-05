@@ -37,22 +37,90 @@ def export_onnx(checkpoint: Path, out: Path, piper_python: str) -> None:
                    check=True)
 
 
+def write_onnx_metadata(path: Path, cfg: dict, n_speakers: int) -> None:
+    """Stamp the metadata a native runtime reads out of the graph.
+
+    Piper's exporter leaves `metadata_props` empty, and sherpa-onnx refuses to load a VITS model
+    without it — `'sample_rate' does not exist in the metadata`. Two of these fields matter more
+    than they look:
+
+      add_blank   1 tells the runtime to interleave the blank symbol between phonemes, which is
+                  exactly Piper's training convention (BOS PAD (phoneme PAD)* EOS). Without it a
+                  native runtime feeds half-length sequences and the duration predictor is wrong.
+      n_speakers  the runtime uses it to validate the speaker id, so a multi-speaker model
+                  declared as single-speaker silently ignores the id and always speaks as
+                  speaker 0.
+    """
+    import onnx
+
+    m = onnx.load(str(path))
+    while len(m.metadata_props):
+        m.metadata_props.pop()
+    meta = {
+        "model_type": "vits",
+        "comment": "piper",
+        "sample_rate": cfg.get("audio", {}).get("sample_rate", 22050),
+        "add_blank": 1,
+        "n_speakers": n_speakers,
+        "language": "twi",
+        "voice": cfg.get("espeak", {}).get("voice", "tw"),
+        "has_espeak": 0,
+        "phoneme_type": cfg.get("phoneme_type", "text"),
+    }
+    for k, v in meta.items():
+        p = m.metadata_props.add()
+        p.key, p.value = str(k), str(v)
+    onnx.save(m, str(path))
+    print(f"onnx metadata: {meta}")
+
+
 def write_tokens(id_map: dict[str, list[int]], path: Path) -> None:
     """tokens.txt as '<symbol> <id>' per line, ordered by id.
 
-    Native runtimes read this instead of config.json. The space-separated format cannot express
-    a symbol that *is* a space, so that entry is written as the literal word for it.
+    The space symbol is written as a **literal space**, giving a line that begins with one:
+
+        " 3"
+
+    That looks malformed and is not. sherpa-onnx splits each line on its last whitespace, so a
+    leading space parses as the symbol. Substituting a placeholder like `<space>` instead makes
+    sherpa throw `IndexError: _Map_base::at` on every single utterance, because it looks up " "
+    to separate words and the map has no such key — a failure whose message points nowhere near
+    the cause.
     """
     rows = sorted(((v[0], k) for k, v in id_map.items()), key=lambda r: r[0])
     with open(path, "w", encoding="utf-8") as fh:
         for idx, sym in rows:
-            fh.write(f"{'<space>' if sym == ' ' else sym} {idx}\n")
+            fh.write(f"{sym} {idx}\n")
     print(f"tokens.txt: {len(rows)} symbols")
+
+
+# sherpa-onnx's word splitter breaks on any character that is not an ASCII letter, which
+# includes the Twi vowels ɔ and ɛ: `onyankopɔn` is split at the ɔ and the fragment is reported
+# OOV and dropped. So lexicon keys are written in ASCII with these two substitutions, and a
+# native caller applies the same two replacements to its input text.
+#
+# q and x are the stand-ins because **Akan has no q or x**, so they cannot collide with a real
+# Twi word. Measured over the 78k-word lexicon: 3 collisions, all with English words such as
+# `acquire`. The obvious-looking alternatives are far worse -- ɔ→ooo / ɛ→eee produces 49
+# collisions between genuine Twi minimal pairs (`aseɛ` and `asɛe` both become `aseeee`), because
+# it clashes with real Twi vowel sequences.
+ASCII_SUB = {"ɔ": "q", "ɛ": "x"}
+
+
+def asciify(word: str) -> str:
+    for src, dst in ASCII_SUB.items():
+        word = word.replace(src, dst)
+    return word
 
 
 def build_lexicon(manifest: Path, symbols: set[str], out: Path, dialect: str,
                   threads: int, max_words: int) -> None:
-    """word -> phonemes for the vocabulary seen in the training manifest."""
+    """word -> phonemes for the vocabulary seen in the training manifest.
+
+    Written twice: `lexicon.txt` with the true Twi spellings, and `lexicon_ascii.txt` with keys
+    asciified for sherpa-onnx. Native runtimes need the second one; anything that can hold a
+    Unicode key should use the first.
+    """
     from stable_twi_tts.g2p import english_phonemes, twi_phonemes
 
     vocab: dict[str, str] = {}
@@ -63,11 +131,20 @@ def build_lexicon(manifest: Path, symbols: set[str], out: Path, dialect: str,
             for w in re.findall(r"[^\W\d_]+", (r.get("text") or "").lower()):
                 counts[(lang, w)] = counts.get((lang, w), 0) + 1
 
+    # A lexicon is keyed by spelling alone, but the same spelling occurs in both languages with
+    # different pronunciations — `a`, `no`, `me`, `aa` are all common Twi words *and* English
+    # ones. Twi wins every collision: this is a Twi voice, Twi homographs are far more frequent
+    # in Twi text, and handing them English phonemes (with stress and length marks they should
+    # never carry) is much the worse failure. English keeps only spellings Twi never uses.
+    twi_words = {w for (lang, w) in counts if lang == "twi"}
+    shadowed = sum(1 for (lang, w) in counts if lang != "twi" and w in twi_words)
     # Most frequent first, so a truncated lexicon still covers most running text.
-    ranked = sorted(counts.items(), key=lambda kv: -kv[1])
+    ranked = [kv for kv in sorted(counts.items(), key=lambda kv: -kv[1])
+              if kv[0][0] == "twi" or kv[0][1] not in twi_words]
     if max_words:
         ranked = ranked[:max_words]
-    print(f"lexicon vocabulary: {len(ranked)} (lang, word) pairs", flush=True)
+    print(f"lexicon vocabulary: {len(ranked)} (lang, word) pairs "
+          f"({shadowed} English spellings deferred to their Twi homograph)", flush=True)
 
     def one(item):
         (lang, w), _ = item
@@ -88,7 +165,23 @@ def build_lexicon(manifest: Path, symbols: set[str], out: Path, dialect: str,
     with open(out, "w", encoding="utf-8") as fh:
         for w in sorted(vocab):
             fh.write(f"{w} {vocab[w]}\n")
-    print(f"lexicon.txt: {len(vocab)} words")
+    print(f"{out.name}: {len(vocab)} words")
+
+    # The sherpa-compatible copy. Collisions are reported rather than hidden: an asciified key
+    # that already exists means one word's pronunciation would overwrite another's.
+    ascii_out = out.with_name(out.stem + "_ascii" + out.suffix)
+    seen: dict[str, str] = {}
+    collisions = []
+    with open(ascii_out, "w", encoding="utf-8") as fh:
+        for w in sorted(vocab):
+            k = asciify(w)
+            if k in seen and seen[k] != w:
+                collisions.append((seen[k], w, k))
+                continue
+            seen[k] = w
+            fh.write(f"{k} {vocab[w]}\n")
+    print(f"{ascii_out.name}: {len(seen)} words, {len(collisions)} collisions dropped"
+          + (f" (e.g. {collisions[0][0]!r} vs {collisions[0][1]!r})" if collisions else ""))
 
 
 def main() -> None:
@@ -106,7 +199,9 @@ def main() -> None:
     ap.add_argument("--dialect", default="Asante Twi")
     ap.add_argument("--lexicon", action="store_true",
                     help="also build lexicon.txt for native runtimes")
-    ap.add_argument("--lexicon-max-words", type=int, default=80_000)
+    ap.add_argument("--lexicon-max-words", type=int, default=0,
+                   help="0 = the whole manifest vocabulary; the lexicon is the only way a "
+                        "native runtime can pronounce Twi, so truncating it silently drops words")
     ap.add_argument("--threads", type=int, default=16)
     ap.add_argument("--skip-onnx", action="store_true", help="reuse an existing model.onnx")
     args = ap.parse_args()
@@ -122,6 +217,8 @@ def main() -> None:
 
     (out / "config.json").write_text(json.dumps(cfg, ensure_ascii=False, indent=1))
     write_tokens(id_map, out / "tokens.txt")
+    if (out / "model.onnx").exists():
+        write_onnx_metadata(out / "model.onnx", cfg, cfg.get("num_speakers", len(spk_map)))
 
     voices = build_registry(args.manifest, spk_map, top_n=args.top_n,
                             min_hours=args.min_hours)
