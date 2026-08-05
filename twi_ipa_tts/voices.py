@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
+from dataclasses import fields as dataclass_fields
 from pathlib import Path
 
 
@@ -25,9 +26,18 @@ class Voice:
     hours: float         # training audio behind this voice
     clips: int
     source_speaker: str  # pseudo-speaker id it came from, e.g. spk_0006
+    # Measured quality, present once a ranking pass has run. Optional because a freshly
+    # exported voice directory knows its hours but has not been measured yet.
+    codeswitch_uer_avg: float | None = None
+    codeswitch_uer_twi_asr: float | None = None
+    codeswitch_uer_english_asr: float | None = None
+    twi_only_uer: float | None = None
+    meets_benchmark: bool | None = None
 
     def __str__(self) -> str:
-        return f"{self.name} ({self.language}, {self.hours:.1f} h)"
+        q = (f", cs {self.codeswitch_uer_avg:.1%}"
+             if self.codeswitch_uer_avg is not None else "")
+        return f"{self.name} ({self.language}, {self.hours:.1f} h{q})"
 
 
 class VoiceRegistry:
@@ -39,7 +49,11 @@ class VoiceRegistry:
     @classmethod
     def load(cls, path: str | Path) -> "VoiceRegistry":
         data = json.loads(Path(path).read_text(encoding="utf-8"))
-        return cls([Voice(**v) for v in data["voices"]])
+        # Ignore unknown keys rather than crashing: voices.json gains annotation fields as new
+        # measurement passes are added, and an older library should still load a newer file.
+        fields = {f.name for f in dataclass_fields(Voice)}
+        return cls([Voice(**{k: v for k, v in entry.items() if k in fields})
+                    for entry in data["voices"]])
 
     def get(self, name_or_id: str | int) -> Voice:
         """Accepts a public name, a source speaker id, or a raw integer speaker index.
@@ -70,10 +84,26 @@ class VoiceRegistry:
         return max(opts, key=lambda v: v.hours)
 
     def describe(self) -> str:
-        lines = [f"{'voice':10} {'lang':5} {'hours':>7}  {'clips':>7}  source"]
-        for v in sorted(self.voices, key=lambda v: (v.language, -v.hours)):
-            lines.append(f"{v.name:10} {v.language:5} {v.hours:7.2f}  {v.clips:7}  "
-                         f"{v.source_speaker}")
+        """List voices in ranked order, showing the measurement they were ranked on."""
+        measured = any(v.codeswitch_uer_avg is not None for v in self.voices)
+        head = f"{'voice':8} {'lang':5} {'hours':>6}"
+        head += "  code-switch  twi-only  source" if measured else f"  {'clips':>7}  source"
+        lines = [head]
+        order = (sorted(self.voices, key=lambda v: (v.codeswitch_uer_avg is None,
+                                                    v.codeswitch_uer_avg or 0))
+                 if measured else sorted(self.voices, key=lambda v: (v.language, -v.hours)))
+        for v in order:
+            row = f"{v.name:8} {v.language:5} {v.hours:6.2f}"
+            if measured:
+                cs = f"{v.codeswitch_uer_avg:.1%}" if v.codeswitch_uer_avg is not None else "-"
+                to = f"{v.twi_only_uer:.1%}" if v.twi_only_uer is not None else "-"
+                row += f"  {cs:>11}  {to:>8}  {v.source_speaker}"
+            else:
+                row += f"  {v.clips:7}  {v.source_speaker}"
+            lines.append(row)
+        if measured:
+            lines.append("\nranked by phoneme error on held-out code-switched text "
+                         "(lower is better); twi-only shown for contrast")
         return "\n".join(lines)
 
 

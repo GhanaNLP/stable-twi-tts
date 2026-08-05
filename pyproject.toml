@@ -21,10 +21,6 @@ twi = [
     "africa-g2p @ git+https://github.com/AfriSpeech/africa-g2p",
     "ghana-g2p @ git+https://github.com/GhanaNLP/ghana-g2p",
 ]
-# English-to-Twi adaptation, for english_mode="adapt".
-adapt = [
-    "en-twi-pronouncer @ git+https://github.com/GhanaNLP/en-twi-pronouncer",
-]
 
 [project.scripts]
 twi-ipa-tts = "twi_ipa_tts.cli:main"

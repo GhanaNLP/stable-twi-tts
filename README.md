@@ -6,9 +6,10 @@ macOS, Windows, ARM and mobile.
 
 Two things it does that a generic TTS wrapper doesn't:
 
-- **It ships a curated voice shortlist.** The checkpoint holds 1,555 pseudo-speakers, most with
-  minutes of audio behind them. Only the ones with enough training data to sound stable are
-  offered by name.
+- **Voices are ranked by measured intelligibility**, not by how much audio they were trained on.
+  The checkpoint holds 1,555 pseudo-speakers; the 12 offered by name were selected by
+  synthesising held-out text and scoring it with a phoneme recogniser. Hours turned out to be a
+  poor predictor.
 - **Batch generation is first-class.** Point it at a `.csv` of 50,000 lines and it parallelises,
   resumes, records a manifest, and doesn't abort the run because line 4,012 had a character it
   couldn't pronounce.
@@ -26,45 +27,6 @@ twi-ipa-tts --model voices/twi-ipa --text "Akwaaba, wo ho te sɛn?" --out hello.
 twi-ipa-tts --model voices/twi-ipa --language eng --text "Good morning, Accra." --out en.wav
 ```
 
-## Two ways to say an English word
-
-Text containing English can be handled either way, and neither is universally right:
-
-```bash
-# native: pronounce the English as English
-twi-ipa-tts --model voices/twi-ipa --language mixed --english-mode native \
-    --text "Mepɛ sɛ mesua [computer science] wɔ [University of Ghana]." --out native.wav
-
-# adapt: respell it in Twi and pronounce it as Twi
-twi-ipa-tts --model voices/twi-ipa --language mixed --english-mode adapt \
-    --text "Mepɛ sɛ mesua [computer science] wɔ [University of Ghana]." --out adapt.wav
-```
-
-The same sentence, phonemised both ways:
-
-```
-native  m e pʰ ɛ s ɛ m e s u a  k ə m p j ˈuː ɾ ɚ  s ˈaɪ ə n s  w ɔ  j ˌuː n ɪ v ˈɜː s ᵻ ɾ i  …
-adapt   m e pʰ ɛ s ɛ m e s u a  kʰ ɔ m pʰ u tʰ a  s a j e n s e  w ɔ  j u n ɪ b ɛ s ɪ tʰ ɪ  …
-```
-
-| | `native` | `adapt` |
-|---|---|---|
-| pronunciation | Ghanaian-accented English | Twi, as a loanword |
-| `computer` | `k ə m p j uː ɾ ɚ` | `kʰ ɔ m pʰ u tʰ a` (*kɔmputa*) |
-| needs | a model trained on English audio | nothing — output is pure Twi phonemes |
-| right for | names, quotations, unfamiliar English | established loanwords: *sukuu*, *asɔpiti*, *pɔlisi* |
-
-`adapt` uses [en-twi-pronouncer](https://github.com/GhanaNLP/en-twi-pronouncer) — a 39,692-word
-lexicon of established Twi borrowing forms, with deterministic rules for anything unlisted. It
-works offline and needs no API. Install it with `pip install 'twi-ipa-tts[adapt]'`.
-
-Because adapted output contains **no English phonemes at all**, `adapt` also works on a
-Twi-only model. `--strict-adapt` restricts it to curated lexicon entries and leaves unknown
-words alone, for when a wrong pronunciation is worse than an unadapted word.
-
-In `native` mode, `[bracketed]` spans mark the English. In `adapt` mode the brackets are
-optional — English words are detected by spelling and lexicon lookup.
-
 ```python
 from twi_ipa_tts import TwiIpaTTS
 
@@ -79,28 +41,37 @@ twi-ipa-tts --model voices/twi-ipa --list-voices
 ```
 
 ```
-voice      lang    hours    clips  source
-twi-1      twi     11.24    10632  spk_0006
-twi-2      twi      9.48     8462  spk_0075
-twi-3      twi      8.50     7555  spk_0019
+voice    lang   hours  code-switch  twi-only  source
+twi-1    twi     6.88        59.8%     33.5%  spk_0016
+twi-2    twi     5.80        60.7%     29.1%  spk_0080
+twi-3    twi    11.24        61.0%     29.1%  spk_0006
 ...
-eng-1      eng     13.12     3456  eng_0031
-eng-2      eng     10.75     2852  eng_0024
+twi-6    twi     2.72        61.2%     26.8%  spk_0002
+twi-9    twi     3.51        65.5%     28.1%  spk_0165
 ```
 
-**Why a shortlist rather than all 1,555?** The speakers are *pseudo-speakers* — derived by
-clustering x-vectors over unlabelled broadcast audio, because the source corpora had no speaker
-labels. The distribution is extremely uneven: the busiest voice has 11 hours, the median has
-minutes. A speaker embedding trained on a handful of clips gives an unstable, muddy voice, so
-listing all of them would mostly be offering ways to get a bad result. `voices.json` records the
-hours behind each voice so the ranking is inspectable rather than asserted.
+**Voices are ranked by measured intelligibility, not by training hours** — and the two disagree
+sharply. Each voice synthesised the same held-out text, which was then re-recognised and scored
+for phoneme error: Twi with the Ghana phoneme ASR, the English spans with KoelLabs. 30 of the
+207 Twi pseudo-speakers were measured.
 
-Anything off the list is still reachable — `--voice 42` uses raw speaker index 42. It works; you
-just have no guarantee about it.
+Two rankings, because they do not substitute for each other:
 
-Voices are also **language-specific**, because the training corpora were: Twi speakers only ever
-spoke Twi and English speakers only English. Asking `twi-1` to read English works, but it is
-extrapolation and will sound less settled than `eng-1`.
+| use | tier | pick |
+|---|---|---|
+| text mixing English into Twi | `tiers.codeswitch` | `twi-1` (59.8%) |
+| pure Twi | `tiers.twi_only` | `twi-6` (26.8%, floor is 25.9%) |
+
+`twi-1` is the **best code-switch voice but 21st of 30 on pure Twi**; `twi-9` is 3rd on Twi and
+among the worst on code-switch. Had we ranked by hours — as the first version did — the best
+mixed-text voice would have been buried and two of the three best Twi voices excluded entirely
+(they have under 3.3 h each).
+
+`voices.json` records every measurement, so the ranking is inspectable rather than asserted.
+Unlisted speakers are reachable by raw index (`--voice 42`), unmeasured.
+
+There are **no separate English voices.** These are Twi voices judged on how well they also
+handle English, which is what reading real Ghanaian text requires.
 
 ## Batch generation
 
