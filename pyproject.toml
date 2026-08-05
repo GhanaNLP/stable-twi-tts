@@ -3,7 +3,7 @@ requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "twi-ipa-tts"
+name = "stable-twi-tts"
 version = "0.1.0"
 description = "Twi and Ghanaian English speech synthesis on ONNX"
 readme = "README.md"
@@ -23,7 +23,7 @@ twi = [
 ]
 
 [project.scripts]
-twi-ipa-tts = "twi_ipa_tts.cli:main"
+stable-twi-tts = "stable_twi_tts.cli:main"
 
 [tool.setuptools]
-packages = ["twi_ipa_tts"]
+packages = ["stable_twi_tts"]

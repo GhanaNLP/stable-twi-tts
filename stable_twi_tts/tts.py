@@ -46,7 +46,7 @@ class Synthesis:
         return p
 
 
-class TwiIpaTTS:
+class StableTwiTTS:
     """Load a voice directory containing model.onnx, config.json and voices.json."""
 
     def __init__(self, model_dir: str | Path, providers: list[str] | None = None,

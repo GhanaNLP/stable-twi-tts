@@ -1,4 +1,4 @@
-# twi-ipa-tts
+# stable-twi-tts
 
 Speech synthesis for **Twi** and **Ghanaian English**, running on ONNX — a ~50 MB dependency
 instead of a ~2 GB PyTorch install, many times realtime on a laptop CPU, and portable to Linux,
@@ -15,29 +15,29 @@ Two things it does that a generic TTS wrapper doesn't:
   couldn't pronounce.
 
 ```bash
-pip install twi-ipa-tts
+pip install stable-twi-tts
 apt install espeak-ng                      # needed for English
-pip install 'twi-ipa-tts[twi]'               # needed for Twi
+pip install 'stable-twi-tts[twi]'               # needed for Twi
 ```
 
 ## Speak something
 
 ```bash
-twi-ipa-tts --model voices/twi-ipa --text "Akwaaba, wo ho te sɛn?" --out hello.wav
-twi-ipa-tts --model voices/twi-ipa --language eng --text "Good morning, Accra." --out en.wav
+stable-twi-tts --model voices/twi-ipa --text "Akwaaba, wo ho te sɛn?" --out hello.wav
+stable-twi-tts --model voices/twi-ipa --language eng --text "Good morning, Accra." --out en.wav
 ```
 
 ```python
-from twi_ipa_tts import TwiIpaTTS
+from stable_twi_tts import StableTwiTTS
 
-tts = TwiIpaTTS("voices/twi-ipa")
+tts = StableTwiTTS("voices/twi-ipa")
 tts.synthesize("Akwaaba, wo ho te sɛn?", voice="twi-1").save("hello.wav")
 ```
 
 ## Choosing a voice
 
 ```bash
-twi-ipa-tts --model voices/twi-ipa --list-voices
+stable-twi-tts --model voices/twi-ipa --list-voices
 ```
 
 ```
@@ -78,7 +78,7 @@ handle English, which is what reading real Ghanaian text requires.
 Any of `.txt` (one utterance per line), `.csv`/`.tsv` (needs a `text` column), or `.jsonl`.
 
 ```bash
-twi-ipa-tts --model voices/twi-ipa --input corpus.csv --out synth/ --workers 8
+stable-twi-tts --model voices/twi-ipa --input corpus.csv --out synth/ --workers 8
 ```
 
 ```

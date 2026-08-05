@@ -70,7 +70,7 @@ def _twi_engine(dialect: str):
     except ImportError as e:  # pragma: no cover
         raise PhonemeError(
             "Twi needs ghana-g2p. Install with:\n"
-            "  pip install 'twi-ipa-tts[twi]'\n"
+            "  pip install 'stable-twi-tts[twi]'\n"
             "or from source (its wheel build is currently broken):\n"
             "  git clone https://github.com/AfriSpeech/africa-g2p\n"
             "  git clone https://github.com/GhanaNLP/ghana-g2p\n"

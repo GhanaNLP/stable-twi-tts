@@ -53,7 +53,7 @@ def _read_items(path: Path, default_voice: str | None, default_lang: str) -> lis
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(prog="twi-ipa-tts",
+    ap = argparse.ArgumentParser(prog="stable-twi-tts",
                                 description="Twi / Ghanaian English speech synthesis")
     ap.add_argument("--model", required=True, help="voice directory (model.onnx, config.json)")
     ap.add_argument("--voice", default=None, help="voice name; default is the best per language")
@@ -76,8 +76,8 @@ def main(argv: list[str] | None = None) -> int:
                     help="batch: write a JSONL record per utterance (default: <out>/manifest.jsonl)")
     args = ap.parse_args(argv)
 
-    from .tts import TwiIpaTTS
-    tts = TwiIpaTTS(args.model, num_threads=args.threads)
+    from .tts import StableTwiTTS
+    tts = StableTwiTTS(args.model, num_threads=args.threads)
 
     if args.list_voices:
         print(tts.voices.describe())

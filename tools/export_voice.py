@@ -27,7 +27,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from twi_ipa_tts.voices import build_registry  # noqa: E402
+from stable_twi_tts.voices import build_registry  # noqa: E402
 
 
 def export_onnx(checkpoint: Path, out: Path, piper_python: str) -> None:
@@ -53,7 +53,7 @@ def write_tokens(id_map: dict[str, list[int]], path: Path) -> None:
 def build_lexicon(manifest: Path, symbols: set[str], out: Path, dialect: str,
                   threads: int, max_words: int) -> None:
     """word -> phonemes for the vocabulary seen in the training manifest."""
-    from twi_ipa_tts.g2p import english_phonemes, twi_phonemes
+    from stable_twi_tts.g2p import english_phonemes, twi_phonemes
 
     vocab: dict[str, str] = {}
     counts: dict[tuple[str, str], int] = {}
