@@ -53,18 +53,31 @@ class StableTwiTTS:
 
     @classmethod
     def from_pretrained(cls, repo_id: str | None = None, revision: str | None = None,
-                        cache_dir: str | Path | None = None, **kwargs) -> "StableTwiTTS":
-        """Download a published voice from the Hub and load it.
+                        cache_dir: str | Path | None = None, quiet: bool = False,
+                        **kwargs) -> "StableTwiTTS":
+        """Download the published voice and load it. Needs no extra dependency.
 
-        Fetches only what inference needs. The same repo also holds a ~930 MB training
-        checkpoint under `finetune/`, which a plain snapshot would pull for nothing — the
-        model itself is 80 MB.
+        By default the four inference files come from a GitHub release over `urllib`, with their
+        checksums verified — see download.py for why that beats huggingface_hub, which would add
+        twelve transitive packages to fetch 77 MB.
+
+        Passing `repo_id` or `revision` selects the Hub instead, and that needs
+        `pip install 'stable-twi-tts[hub]'`. Use it to load a fork, or to pin a revision other
+        than the release this version ships against. The Hub repo also holds a ~930 MB training
+        checkpoint under `finetune/`, so only inference files are requested.
         """
+        if repo_id is None and revision is None:
+            from .download import ensure_model
+            return cls(ensure_model(cache_dir, quiet=quiet), **kwargs)
+
         try:
             from huggingface_hub import snapshot_download
         except ImportError as e:
-            raise ImportError("from_pretrained needs huggingface_hub:\n"
-                              "  pip install 'stable-twi-tts[hub]'") from e
+            raise ImportError(
+                "repo_id and revision select the Hugging Face Hub, which needs:\n"
+                "  pip install 'stable-twi-tts[hub]'\n"
+                "Call from_pretrained() with no arguments for the GitHub release instead — "
+                "same weights, no extra packages.") from e
 
         path = snapshot_download(
             repo_id or cls.DEFAULT_REPO, revision=revision, cache_dir=cache_dir,

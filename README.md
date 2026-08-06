@@ -15,12 +15,13 @@ Two things it does that a generic TTS wrapper doesn't:
   couldn't pronounce.
 
 ```bash
-pip install "stable-twi-tts[hub,twi]"
+pip install "stable-twi-tts[twi]"
 apt install espeak-ng          # or: brew install espeak-ng   (needed for English)
 ```
 
-The `twi` extra brings the Twi front-end (`ghana-g2p`); `hub` lets the model download itself.
-`espeak-ng` is a system package, not a Python one, and is needed only for English words:
+The `twi` extra brings the Twi front-end (`ghana-g2p`). `espeak-ng` is a system package, not a
+Python one, and is needed only for English words. Nothing else is required — the model downloads
+itself from a GitHub release over the standard library, checksums verified:
 
 ```bash
 stable-twi-tts --voice twi-6 --text "Akwaaba, wo ho te sɛn?" --out hello.wav

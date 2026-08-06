@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "stable-twi-tts"
-version = "0.1.0"
+version = "0.1.1"
 description = "Twi and Ghanaian English speech synthesis on ONNX"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -27,12 +27,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Downloading the published voice with from_pretrained().
+# Only for loading a fork or a non-default revision from the Hugging Face Hub. The default
+# from_pretrained() path fetches a GitHub release over urllib and needs nothing extra —
+# huggingface_hub brings twelve transitive packages, which is a poor trade for four files.
 hub = ["huggingface_hub>=0.24"]
 # Local web UI: text, PDF or URL in, audio out.
 web = [
     "fastapi>=0.110", "uvicorn>=0.27", "python-multipart>=0.0.9",
-    "huggingface_hub>=0.24", "pypdf>=4.0", "trafilatura>=1.8",
+    "pypdf>=4.0", "trafilatura>=1.8",
 ]
 # Twi text. ghana-g2p pulls africa-g2p itself, so this one line is the whole Twi front-end.
 #
@@ -43,7 +45,7 @@ web = [
 twi = ["ghana-g2p>=0.1.0"]
 
 # Everything, minus the dev tools.
-all = ["stable-twi-tts[hub,web,twi]"]
+all = ["stable-twi-tts[web,twi]"]
 
 [project.urls]
 Homepage = "https://github.com/GhanaNLP/stable-twi-tts"
