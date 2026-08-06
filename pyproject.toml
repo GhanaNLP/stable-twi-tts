@@ -34,16 +34,16 @@ web = [
     "fastapi>=0.110", "uvicorn>=0.27", "python-multipart>=0.0.9",
     "huggingface_hub>=0.24", "pypdf>=4.0", "trafilatura>=1.8",
 ]
+# Twi text. ghana-g2p pulls africa-g2p itself, so this one line is the whole Twi front-end.
+#
+# The version floor is not cosmetic: the model was trained on ghana-g2p 0.1.0's phonemes, and a
+# front-end that disagrees with training degrades audio without raising anything — that failure
+# mode cost this project a day at 68.6% phoneme error. Treat a major bump upstream as needing a
+# re-measurement, not as a routine upgrade.
+twi = ["ghana-g2p>=0.1.0"]
 
-# There is deliberately no `twi` extra. Twi text needs ghana-g2p, which is not on PyPI, and PyPI
-# rejects any distribution whose metadata carries a direct URL ("Can't have direct dependency") —
-# so an extra pointing at git+https would make this package unpublishable. Install it separately:
-#
-#   pip install git+https://github.com/AfriSpeech/africa-g2p \
-#               git+https://github.com/GhanaNLP/ghana-g2p
-#
-# Both are needed; africa-g2p's own wheel build is broken upstream (it ships data/ twice, so
-# hatchling refuses the archive), which is why it is a git reference rather than a version.
+# Everything, minus the dev tools.
+all = ["stable-twi-tts[hub,web,twi]"]
 
 [project.urls]
 Homepage = "https://github.com/GhanaNLP/stable-twi-tts"
