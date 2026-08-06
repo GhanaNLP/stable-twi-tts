@@ -1,0 +1,212 @@
+{
+ "compare": [
+  {
+   "file": "compare_twi_twi-1.mp3",
+   "voice": "twi-1",
+   "tag": "twi",
+   "duration": 3.08
+  },
+  {
+   "file": "compare_twi_twi-2.mp3",
+   "voice": "twi-2",
+   "tag": "twi",
+   "duration": 2.65
+  },
+  {
+   "file": "compare_twi_twi-3.mp3",
+   "voice": "twi-3",
+   "tag": "twi",
+   "duration": 2.61
+  },
+  {
+   "file": "compare_twi_twi-4.mp3",
+   "voice": "twi-4",
+   "tag": "twi",
+   "duration": 2.37
+  },
+  {
+   "file": "compare_twi_twi-5.mp3",
+   "voice": "twi-5",
+   "tag": "twi",
+   "duration": 2.73
+  },
+  {
+   "file": "compare_twi_twi-6.mp3",
+   "voice": "twi-6",
+   "tag": "twi",
+   "duration": 2.5
+  },
+  {
+   "file": "compare_twi_twi-7.mp3",
+   "voice": "twi-7",
+   "tag": "twi",
+   "duration": 2.8
+  },
+  {
+   "file": "compare_twi_twi-8.mp3",
+   "voice": "twi-8",
+   "tag": "twi",
+   "duration": 2.72
+  },
+  {
+   "file": "compare_twi_twi-9.mp3",
+   "voice": "twi-9",
+   "tag": "twi",
+   "duration": 2.58
+  },
+  {
+   "file": "compare_twi_twi-10.mp3",
+   "voice": "twi-10",
+   "tag": "twi",
+   "duration": 2.99
+  },
+  {
+   "file": "compare_twi_twi-11.mp3",
+   "voice": "twi-11",
+   "tag": "twi",
+   "duration": 2.59
+  },
+  {
+   "file": "compare_twi_twi-12.mp3",
+   "voice": "twi-12",
+   "tag": "twi",
+   "duration": 2.48
+  },
+  {
+   "file": "compare_cs_twi-1.mp3",
+   "voice": "twi-1",
+   "tag": "cs",
+   "duration": 4.26
+  },
+  {
+   "file": "compare_cs_twi-2.mp3",
+   "voice": "twi-2",
+   "tag": "cs",
+   "duration": 3.03
+  },
+  {
+   "file": "compare_cs_twi-3.mp3",
+   "voice": "twi-3",
+   "tag": "cs",
+   "duration": 3.39
+  },
+  {
+   "file": "compare_cs_twi-4.mp3",
+   "voice": "twi-4",
+   "tag": "cs",
+   "duration": 3.22
+  },
+  {
+   "file": "compare_cs_twi-5.mp3",
+   "voice": "twi-5",
+   "tag": "cs",
+   "duration": 4.06
+  },
+  {
+   "file": "compare_cs_twi-6.mp3",
+   "voice": "twi-6",
+   "tag": "cs",
+   "duration": 3.45
+  },
+  {
+   "file": "compare_cs_twi-7.mp3",
+   "voice": "twi-7",
+   "tag": "cs",
+   "duration": 3.76
+  },
+  {
+   "file": "compare_cs_twi-8.mp3",
+   "voice": "twi-8",
+   "tag": "cs",
+   "duration": 3.23
+  },
+  {
+   "file": "compare_cs_twi-9.mp3",
+   "voice": "twi-9",
+   "tag": "cs",
+   "duration": 3.8
+  },
+  {
+   "file": "compare_cs_twi-10.mp3",
+   "voice": "twi-10",
+   "tag": "cs",
+   "duration": 3.24
+  },
+  {
+   "file": "compare_cs_twi-11.mp3",
+   "voice": "twi-11",
+   "tag": "cs",
+   "duration": 3.13
+  },
+  {
+   "file": "compare_cs_twi-12.mp3",
+   "voice": "twi-12",
+   "tag": "cs",
+   "duration": 4.16
+  }
+ ],
+ "showcase": [
+  {
+   "file": "showcase_greeting.mp3",
+   "voice": "twi-6",
+   "name": "greeting",
+   "duration": 2.03
+  },
+  {
+   "file": "showcase_statement.mp3",
+   "voice": "twi-6",
+   "name": "statement",
+   "duration": 1.8
+  },
+  {
+   "file": "showcase_question.mp3",
+   "voice": "twi-6",
+   "name": "question",
+   "duration": 2.09
+  },
+  {
+   "file": "showcase_long.mp3",
+   "voice": "twi-7",
+   "name": "long",
+   "duration": 6.32
+  },
+  {
+   "file": "showcase_numbers.mp3",
+   "voice": "twi-7",
+   "name": "numbers",
+   "duration": 3.4
+  },
+  {
+   "file": "showcase_news.mp3",
+   "voice": "twi-1",
+   "name": "news",
+   "duration": 4.59
+  },
+  {
+   "file": "showcase_institution.mp3",
+   "voice": "twi-1",
+   "name": "institution",
+   "duration": 2.46
+  },
+  {
+   "file": "showcase_english.mp3",
+   "voice": "twi-1",
+   "name": "english",
+   "duration": 2.57
+  }
+ ],
+ "compare_texts": {
+  "twi": "Akwaaba, wo ho te sɛn? Me da wo ase paa.",
+  "cs": "Mepɛ sɛ mesua [computer science] wɔ [University of Ghana]."
+ },
+ "showcase_texts": {
+  "greeting": "Akwaaba! Yɛma wo akwaaba wɔ Ghana.",
+  "statement": "Ghana yɛ ɔman a ɛwɔ Afrika atɔeɛ fam.",
+  "question": "Wo din de sɛn? Wofiri he na woreba?",
+  "long": "Anɔpa yi, ɔsoro abue na awia bɔ. Nnipa pii firi wɔn afie mu rekɔ adwuma, na mmɔfra nso rekɔ sukuu.",
+  "numbers": "Yɛn nsa kaa nnipa apem ne ahanum wɔ ɔmantam no mu.",
+  "news": "Ɔkyerɛkyerɛni no kaa sɛ [the examination] bɛba [next week].",
+  "institution": "[Bank of Ghana] abɔ [interest rate] no so bio.",
+  "english": "Good morning, and welcome to the news."
+ }
+}

@@ -49,6 +49,28 @@ class Synthesis:
 class StableTwiTTS:
     """Load a voice directory containing model.onnx, config.json and voices.json."""
 
+    DEFAULT_REPO = "ghanaopendata/stable-twi-tts"
+
+    @classmethod
+    def from_pretrained(cls, repo_id: str | None = None, revision: str | None = None,
+                        cache_dir: str | Path | None = None, **kwargs) -> "StableTwiTTS":
+        """Download a published voice from the Hub and load it.
+
+        Fetches only what inference needs. The same repo also holds a ~930 MB training
+        checkpoint under `finetune/`, which a plain snapshot would pull for nothing — the
+        model itself is 80 MB.
+        """
+        try:
+            from huggingface_hub import snapshot_download
+        except ImportError as e:
+            raise ImportError("from_pretrained needs huggingface_hub:\n"
+                              "  pip install 'stable-twi-tts[hub]'") from e
+
+        path = snapshot_download(
+            repo_id or cls.DEFAULT_REPO, revision=revision, cache_dir=cache_dir,
+            allow_patterns=["model.onnx", "config.json", "voices.json", "tokens.txt"])
+        return cls(path, **kwargs)
+
     def __init__(self, model_dir: str | Path, providers: list[str] | None = None,
                  num_threads: int | None = None):
         import onnxruntime as ort

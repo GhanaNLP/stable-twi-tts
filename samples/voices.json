@@ -1,0 +1,196 @@
+{
+ "voices": [
+  {
+   "name": "twi-1",
+   "speaker_id": 39,
+   "language": "twi",
+   "hours": 6.88,
+   "clips": 4750,
+   "source_speaker": "spk_0016",
+   "codeswitch_uer_avg": 0.5975,
+   "codeswitch_uer_twi_asr": 0.6653,
+   "codeswitch_uer_english_asr": 0.5296,
+   "twi_only_uer": 0.335,
+   "meets_benchmark": true
+  },
+  {
+   "name": "twi-2",
+   "speaker_id": 5,
+   "language": "twi",
+   "hours": 5.8,
+   "clips": 5870,
+   "source_speaker": "spk_0080",
+   "codeswitch_uer_avg": 0.6065,
+   "codeswitch_uer_twi_asr": 0.6546,
+   "codeswitch_uer_english_asr": 0.5584,
+   "twi_only_uer": 0.2912,
+   "meets_benchmark": true
+  },
+  {
+   "name": "twi-3",
+   "speaker_id": 13,
+   "language": "twi",
+   "hours": 11.24,
+   "clips": 10632,
+   "source_speaker": "spk_0006",
+   "codeswitch_uer_avg": 0.6096,
+   "codeswitch_uer_twi_asr": 0.6667,
+   "codeswitch_uer_english_asr": 0.5524,
+   "twi_only_uer": 0.2912,
+   "meets_benchmark": true
+  },
+  {
+   "name": "twi-4",
+   "speaker_id": 18,
+   "language": "twi",
+   "hours": 8.5,
+   "clips": 7555,
+   "source_speaker": "spk_0019",
+   "codeswitch_uer_avg": 0.6099,
+   "codeswitch_uer_twi_asr": 0.6613,
+   "codeswitch_uer_english_asr": 0.5584,
+   "twi_only_uer": 0.3182,
+   "meets_benchmark": true
+  },
+  {
+   "name": "twi-5",
+   "speaker_id": 14,
+   "language": "twi",
+   "hours": 5.88,
+   "clips": 4574,
+   "source_speaker": "spk_0071",
+   "codeswitch_uer_avg": 0.6106,
+   "codeswitch_uer_twi_asr": 0.6734,
+   "codeswitch_uer_english_asr": 0.5478,
+   "twi_only_uer": 0.2828,
+   "meets_benchmark": true
+  },
+  {
+   "name": "twi-6",
+   "speaker_id": 29,
+   "language": "twi",
+   "hours": 2.72,
+   "clips": 2565,
+   "source_speaker": "spk_0002",
+   "codeswitch_uer_avg": 0.6124,
+   "codeswitch_uer_twi_asr": 0.6694,
+   "codeswitch_uer_english_asr": 0.5554,
+   "twi_only_uer": 0.2677,
+   "meets_benchmark": true
+  },
+  {
+   "name": "twi-7",
+   "speaker_id": 7,
+   "language": "twi",
+   "hours": 3.27,
+   "clips": 2378,
+   "source_speaker": "spk_0004",
+   "codeswitch_uer_avg": 0.6138,
+   "codeswitch_uer_twi_asr": 0.6586,
+   "codeswitch_uer_english_asr": 0.569,
+   "twi_only_uer": 0.2694,
+   "meets_benchmark": true
+  },
+  {
+   "name": "twi-8",
+   "speaker_id": 24,
+   "language": "twi",
+   "hours": 2.42,
+   "clips": 1984,
+   "source_speaker": "spk_0029",
+   "codeswitch_uer_avg": 0.6139,
+   "codeswitch_uer_twi_asr": 0.668,
+   "codeswitch_uer_english_asr": 0.5599,
+   "twi_only_uer": 0.2997,
+   "meets_benchmark": true
+  },
+  {
+   "name": "twi-9",
+   "speaker_id": 1,
+   "language": "twi",
+   "hours": 3.51,
+   "clips": 2833,
+   "source_speaker": "spk_0165",
+   "codeswitch_uer_avg": 0.6555,
+   "codeswitch_uer_twi_asr": 0.7177,
+   "codeswitch_uer_english_asr": 0.5933,
+   "twi_only_uer": 0.2811,
+   "meets_benchmark": false
+  },
+  {
+   "name": "twi-10",
+   "speaker_id": 38,
+   "language": "twi",
+   "hours": 4.43,
+   "clips": 3825,
+   "source_speaker": "spk_0033",
+   "codeswitch_uer_avg": 0.6376,
+   "codeswitch_uer_twi_asr": 0.6909,
+   "codeswitch_uer_english_asr": 0.5842,
+   "twi_only_uer": 0.2997,
+   "meets_benchmark": false
+  },
+  {
+   "name": "twi-11",
+   "speaker_id": 12,
+   "language": "twi",
+   "hours": 9.48,
+   "clips": 8462,
+   "source_speaker": "spk_0075",
+   "codeswitch_uer_avg": 0.6307,
+   "codeswitch_uer_twi_asr": 0.6788,
+   "codeswitch_uer_english_asr": 0.5827,
+   "twi_only_uer": 0.3047,
+   "meets_benchmark": false
+  },
+  {
+   "name": "twi-12",
+   "speaker_id": 2,
+   "language": "twi",
+   "hours": 3.39,
+   "clips": 3768,
+   "source_speaker": "spk_0087",
+   "codeswitch_uer_avg": 0.6448,
+   "codeswitch_uer_twi_asr": 0.6962,
+   "codeswitch_uer_english_asr": 0.5933,
+   "twi_only_uer": 0.3047,
+   "meets_benchmark": false
+  }
+ ],
+ "tiers": {
+  "codeswitch": [
+   "twi-1",
+   "twi-2",
+   "twi-3",
+   "twi-4",
+   "twi-5",
+   "twi-6",
+   "twi-7",
+   "twi-8"
+  ],
+  "twi_only": [
+   "twi-6",
+   "twi-7",
+   "twi-9",
+   "twi-5",
+   "twi-2",
+   "twi-3",
+   "twi-8",
+   "twi-10",
+   "twi-11",
+   "twi-12"
+  ]
+ },
+ "total_speakers_in_checkpoint": 1555,
+ "benchmark": {
+  "speaker": "spk_0006",
+  "codeswitch_uer_avg": 0.6096,
+  "why": "identified by ear as the reference for mixed text; voices within 0.5 points qualify"
+ },
+ "ranking": "twi-cs-* ranked on 20 held-out code-switched sentences, averaging the Ghana phoneme ASR (Twi frame) and KoelLabs xlsr-english-01 (English spans). twi-* ranked on Twi-only text with the Ghana phoneme ASR, floor 25.9%. Lower is better.",
+ "note": "Twi voices only; no separate English voices. 30 of 207 Twi pseudo-speakers were measured. Use twi-cs-* for text mixing English into Twi and twi-* for pure Twi -- the two rankings disagree sharply, so neither substitutes for the other. spk_0016 is the best code-switch voice yet 21st of 30 on pure Twi, while spk_0165 is 3rd on Twi and poor on code-switch. Training hours predicts neither. Unlisted speakers remain reachable by raw speaker index.",
+ "default": {
+  "codeswitch": "twi-1",
+  "twi_only": "twi-6"
+ }
+}

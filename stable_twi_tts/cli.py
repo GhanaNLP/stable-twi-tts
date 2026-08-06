@@ -55,7 +55,11 @@ def _read_items(path: Path, default_voice: str | None, default_lang: str) -> lis
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="stable-twi-tts",
                                 description="Twi / Ghanaian English speech synthesis")
-    ap.add_argument("--model", required=True, help="voice directory (model.onnx, config.json)")
+    ap.add_argument("--model", default=None,
+                    help="voice directory; omit to download the published voice from the Hub")
+    ap.add_argument("--repo", default=None,
+                    help="Hub repo to download when --model is omitted "
+                         "(default: ghanaopendata/stable-twi-tts)")
     ap.add_argument("--voice", default=None, help="voice name; default is the best per language")
     ap.add_argument("--language", default="twi", choices=["twi", "eng", "mixed"],
                     help="'mixed' treats [bracketed] spans as English inside a Twi frame")
@@ -77,7 +81,8 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     from .tts import StableTwiTTS
-    tts = StableTwiTTS(args.model, num_threads=args.threads)
+    tts = (StableTwiTTS(args.model, num_threads=args.threads) if args.model
+           else StableTwiTTS.from_pretrained(args.repo, num_threads=args.threads))
 
     if args.list_voices:
         print(tts.voices.describe())

@@ -1,0 +1,101 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Stable Twi TTS — samples</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root {{ color-scheme: light dark; --fg:#111; --dim:#666; --line:#e3e3e3; --bg:#fff;
+           --accent:#0a7d5a; }}
+  @media (prefers-color-scheme: dark) {{
+    :root {{ --fg:#e8e8e8; --dim:#9a9a9a; --line:#2c2c2c; --bg:#141414; --accent:#4fd1a5; }}
+  }}
+  body {{ max-width: 46rem; margin: 0 auto; padding: 2rem 1.1rem 5rem;
+          font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+          color: var(--fg); background: var(--bg); }}
+  h1 {{ font-size: 1.6rem; margin: 0 0 .3rem; }}
+  h2 {{ font-size: 1.15rem; margin: 2.4rem 0 .4rem; }}
+  .sub {{ color: var(--dim); margin: 0 0 1.6rem; }}
+  .quote {{ border-left: 3px solid var(--accent); padding: .5rem 0 .5rem .9rem;
+            margin: 1rem 0 1.2rem; font-size: 1.02rem; }}
+  table {{ border-collapse: collapse; width: 100%; margin: .5rem 0 1rem; }}
+  th, td {{ text-align: left; padding: .45rem .5rem; border-bottom: 1px solid var(--line);
+            vertical-align: middle; }}
+  th {{ font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: var(--dim);
+        font-weight: 600; }}
+  td.v {{ font-weight: 600; white-space: nowrap; }}
+  td.m {{ color: var(--dim); font-variant-numeric: tabular-nums; font-size: .88rem;
+          white-space: nowrap; }}
+  audio {{ width: 100%; min-width: 15rem; height: 34px; }}
+  .note {{ color: var(--dim); font-size: .9rem; }}
+  code {{ font-size: .88em; background: rgba(128,128,128,.14); padding: .1em .35em;
+          border-radius: 3px; }}
+  .wrap {{ overflow-x: auto; }}
+  a {{ color: var(--accent); }}
+</style>
+<h1>Stable Twi TTS — samples</h1>
+<p class="sub">Twi and Ghanaian English speech synthesis, driven by IPA phonemes.
+<a href="https://github.com/GhanaNLP/stable-twi-tts">Code</a> ·
+<a href="https://huggingface.co/ghanaopendata/stable-twi-tts">Model</a></p>
+
+<h2>Every voice, same Twi sentence</h2>
+<p class="quote">Akwaaba, wo ho te sɛn? Me da wo ase paa.</p>
+<div class="wrap"><table><tr><th>Voice</th><th>Sample</th><th>Twi&nbsp;/&nbsp;code-switch error</th></tr>
+<tr><td class="v">twi-1</td><td><audio controls preload="none" src="../samples/compare_twi_twi-1.mp3"></audio></td><td class="m">34% / 60%</td></tr>
+<tr><td class="v">twi-2</td><td><audio controls preload="none" src="../samples/compare_twi_twi-2.mp3"></audio></td><td class="m">29% / 61%</td></tr>
+<tr><td class="v">twi-3</td><td><audio controls preload="none" src="../samples/compare_twi_twi-3.mp3"></audio></td><td class="m">29% / 61%</td></tr>
+<tr><td class="v">twi-4</td><td><audio controls preload="none" src="../samples/compare_twi_twi-4.mp3"></audio></td><td class="m">32% / 61%</td></tr>
+<tr><td class="v">twi-5</td><td><audio controls preload="none" src="../samples/compare_twi_twi-5.mp3"></audio></td><td class="m">28% / 61%</td></tr>
+<tr><td class="v">twi-6</td><td><audio controls preload="none" src="../samples/compare_twi_twi-6.mp3"></audio></td><td class="m">27% / 61%</td></tr>
+<tr><td class="v">twi-7</td><td><audio controls preload="none" src="../samples/compare_twi_twi-7.mp3"></audio></td><td class="m">27% / 61%</td></tr>
+<tr><td class="v">twi-8</td><td><audio controls preload="none" src="../samples/compare_twi_twi-8.mp3"></audio></td><td class="m">30% / 61%</td></tr>
+<tr><td class="v">twi-9</td><td><audio controls preload="none" src="../samples/compare_twi_twi-9.mp3"></audio></td><td class="m">28% / 66%</td></tr>
+<tr><td class="v">twi-10</td><td><audio controls preload="none" src="../samples/compare_twi_twi-10.mp3"></audio></td><td class="m">30% / 64%</td></tr>
+<tr><td class="v">twi-11</td><td><audio controls preload="none" src="../samples/compare_twi_twi-11.mp3"></audio></td><td class="m">30% / 63%</td></tr>
+<tr><td class="v">twi-12</td><td><audio controls preload="none" src="../samples/compare_twi_twi-12.mp3"></audio></td><td class="m">30% / 64%</td></tr>
+</table></div>
+<h2>Every voice, same code-switched sentence</h2>
+<p class="quote">Mepɛ sɛ mesua [computer science] wɔ [University of Ghana].</p>
+<div class="wrap"><table><tr><th>Voice</th><th>Sample</th><th>Twi&nbsp;/&nbsp;code-switch error</th></tr>
+<tr><td class="v">twi-1</td><td><audio controls preload="none" src="../samples/compare_cs_twi-1.mp3"></audio></td><td class="m">34% / 60%</td></tr>
+<tr><td class="v">twi-2</td><td><audio controls preload="none" src="../samples/compare_cs_twi-2.mp3"></audio></td><td class="m">29% / 61%</td></tr>
+<tr><td class="v">twi-3</td><td><audio controls preload="none" src="../samples/compare_cs_twi-3.mp3"></audio></td><td class="m">29% / 61%</td></tr>
+<tr><td class="v">twi-4</td><td><audio controls preload="none" src="../samples/compare_cs_twi-4.mp3"></audio></td><td class="m">32% / 61%</td></tr>
+<tr><td class="v">twi-5</td><td><audio controls preload="none" src="../samples/compare_cs_twi-5.mp3"></audio></td><td class="m">28% / 61%</td></tr>
+<tr><td class="v">twi-6</td><td><audio controls preload="none" src="../samples/compare_cs_twi-6.mp3"></audio></td><td class="m">27% / 61%</td></tr>
+<tr><td class="v">twi-7</td><td><audio controls preload="none" src="../samples/compare_cs_twi-7.mp3"></audio></td><td class="m">27% / 61%</td></tr>
+<tr><td class="v">twi-8</td><td><audio controls preload="none" src="../samples/compare_cs_twi-8.mp3"></audio></td><td class="m">30% / 61%</td></tr>
+<tr><td class="v">twi-9</td><td><audio controls preload="none" src="../samples/compare_cs_twi-9.mp3"></audio></td><td class="m">28% / 66%</td></tr>
+<tr><td class="v">twi-10</td><td><audio controls preload="none" src="../samples/compare_cs_twi-10.mp3"></audio></td><td class="m">30% / 64%</td></tr>
+<tr><td class="v">twi-11</td><td><audio controls preload="none" src="../samples/compare_cs_twi-11.mp3"></audio></td><td class="m">30% / 63%</td></tr>
+<tr><td class="v">twi-12</td><td><audio controls preload="none" src="../samples/compare_cs_twi-12.mp3"></audio></td><td class="m">30% / 64%</td></tr>
+</table></div>
+<h2>Range of text</h2>
+<p class="note">Different sentence types, using the best voice for each mode.</p>
+<div class="wrap"><table><tr><th>Kind</th><th>Text</th><th>Sample</th></tr>
+<tr><td class="v">greeting</td><td>Akwaaba! Yɛma wo akwaaba wɔ Ghana.</td><td><audio controls preload="none" src="../samples/showcase_greeting.mp3"></audio></td></tr>
+<tr><td class="v">statement</td><td>Ghana yɛ ɔman a ɛwɔ Afrika atɔeɛ fam.</td><td><audio controls preload="none" src="../samples/showcase_statement.mp3"></audio></td></tr>
+<tr><td class="v">question</td><td>Wo din de sɛn? Wofiri he na woreba?</td><td><audio controls preload="none" src="../samples/showcase_question.mp3"></audio></td></tr>
+<tr><td class="v">long</td><td>Anɔpa yi, ɔsoro abue na awia bɔ. Nnipa pii firi wɔn afie mu rekɔ adwuma, na mmɔfra nso rekɔ sukuu.</td><td><audio controls preload="none" src="../samples/showcase_long.mp3"></audio></td></tr>
+<tr><td class="v">numbers</td><td>Yɛn nsa kaa nnipa apem ne ahanum wɔ ɔmantam no mu.</td><td><audio controls preload="none" src="../samples/showcase_numbers.mp3"></audio></td></tr>
+<tr><td class="v">news</td><td>Ɔkyerɛkyerɛni no kaa sɛ [the examination] bɛba [next week].</td><td><audio controls preload="none" src="../samples/showcase_news.mp3"></audio></td></tr>
+<tr><td class="v">institution</td><td>[Bank of Ghana] abɔ [interest rate] no so bio.</td><td><audio controls preload="none" src="../samples/showcase_institution.mp3"></audio></td></tr>
+<tr><td class="v">english</td><td>Good morning, and welcome to the news.</td><td><audio controls preload="none" src="../samples/showcase_english.mp3"></audio></td></tr>
+</table></div>
+
+<h2>How to read these</h2>
+<p class="note">
+Voices are <strong>pseudo-speakers</strong> — derived by clustering x-vectors over unlabelled
+broadcast audio, because neither source corpus had speaker labels. One real person may appear as
+two voices, and no voice is a consented identity.
+</p>
+<p class="note">
+They are ranked by <strong>measured intelligibility, not training hours</strong>, which turned out
+to predict almost nothing: <code>twi-1</code> is the best code-switch voice yet 21st of 30 on pure
+Twi, and two of the three best Twi voices have under 3.3&nbsp;h of audio each. Use
+<code>tiers.codeswitch</code> for text mixing English into Twi and <code>tiers.twi_only</code> for
+pure Twi — the two rankings disagree sharply.
+</p>
+<p class="note">
+English is <strong>audibly weaker than Twi</strong> and band-limited to 8&nbsp;kHz, because the
+English training audio was 16&nbsp;kHz where the Twi was 24&nbsp;kHz. Round-trip phoneme error is
+33.5% for Twi against a 25.9% floor, and 59.5% for English against 32.2%.
+</p>
