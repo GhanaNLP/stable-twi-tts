@@ -31,9 +31,6 @@ a local voice directory instead.
 
 ## Listen
 
-**[▶ Open the sample page](https://ghananlp.github.io/stable-twi-tts/)** — all clips with inline players. The links below open
-GitHub's own audio preview.
-
 ### Every voice, same two sentences
 
 So you can compare voices directly rather than across different content.
