@@ -17,6 +17,11 @@ dependencies = [
 [project.optional-dependencies]
 # Downloading the published voice with from_pretrained().
 hub = ["huggingface_hub>=0.24"]
+# Local web UI: text, PDF or URL in, audio out.
+web = [
+    "fastapi>=0.110", "uvicorn>=0.27", "python-multipart>=0.0.9",
+    "huggingface_hub>=0.24", "pypdf>=4.0", "trafilatura>=1.8",
+]
 # Twi needs ghana-g2p. Its own wheel build is currently broken upstream (africa-g2p ships
 # data/ twice, so hatchling refuses the archive), hence the direct git references.
 twi = [
@@ -26,6 +31,10 @@ twi = [
 
 [project.scripts]
 stable-twi-tts = "stable_twi_tts.cli:main"
+stable-twi-tts-web = "stable_twi_tts.web:main"
 
 [tool.setuptools]
 packages = ["stable_twi_tts"]
+
+[tool.setuptools.package-data]
+stable_twi_tts = ["static/*.html"]

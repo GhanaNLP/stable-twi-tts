@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Stable Twi TTS</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root { color-scheme: light dark;
+          --fg:#111; --dim:#666; --line:#dcdcdc; --bg:#fff; --panel:#f7f7f7;
+          --accent:#0a7d5a; --err:#b3261e; }
+  @media (prefers-color-scheme: dark) {
+    :root { --fg:#e8e8e8; --dim:#9a9a9a; --line:#333; --bg:#151515; --panel:#1e1e1e;
+            --accent:#4fd1a5; --err:#f2b8b5; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:1.5rem 1rem 4rem; background:var(--bg); color:var(--fg);
+         font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif; }
+  main { max-width: 52rem; margin: 0 auto; }
+  h1 { font-size:1.4rem; margin:0 0 .2rem; }
+  .sub { color:var(--dim); margin:0 0 1.4rem; font-size:.92rem; }
+  .tabs { display:flex; gap:.4rem; border-bottom:1px solid var(--line); margin-bottom:1.1rem; }
+  .tab { padding:.5rem .9rem; cursor:pointer; border:none; background:none; color:var(--dim);
+         font:inherit; border-bottom:2px solid transparent; }
+  .tab[aria-selected=true] { color:var(--fg); border-bottom-color:var(--accent);
+                             font-weight:600; }
+  textarea, input[type=url], select, input[type=file] {
+    width:100%; padding:.6rem .7rem; border:1px solid var(--line); border-radius:6px;
+    background:var(--bg); color:var(--fg); font:inherit; }
+  textarea { min-height:8.5rem; resize:vertical; }
+  .row { display:flex; gap:.7rem; flex-wrap:wrap; align-items:end; margin:.9rem 0; }
+  .row > label { flex:1 1 11rem; font-size:.82rem; color:var(--dim); }
+  .row > label > * { margin-top:.25rem; }
+  button.go { background:var(--accent); color:#fff; border:none; border-radius:6px;
+              padding:.62rem 1.3rem; font:inherit; font-weight:600; cursor:pointer; }
+  button.go:disabled { opacity:.5; cursor:default; }
+  button.alt { background:none; border:1px solid var(--line); color:var(--fg);
+               border-radius:6px; padding:.62rem 1rem; font:inherit; cursor:pointer; }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:8px;
+           padding:.9rem; margin-top:1rem; }
+  .hide { display:none; }
+  audio { width:100%; margin-top:.5rem; }
+  .meta { color:var(--dim); font-size:.85rem; margin-top:.4rem; }
+  .err { color:var(--err); }
+  progress { width:100%; height:.5rem; }
+  .hint { color:var(--dim); font-size:.83rem; margin:.3rem 0 0; }
+  code { background:rgba(128,128,128,.15); padding:.08em .3em; border-radius:3px;
+         font-size:.9em; }
+</style>
+<main>
+  <h1>Stable Twi TTS</h1>
+  <p class="sub">Twi and Ghanaian English speech, from text, a PDF, or a web page.</p>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-src="text">Text</button>
+    <button class="tab" role="tab" aria-selected="false" data-src="pdf">PDF</button>
+    <button class="tab" role="tab" aria-selected="false" data-src="url">Web page</button>
+  </div>
+
+  <div id="pane-pdf" class="hide">
+    <input type="file" id="pdf" accept="application/pdf">
+    <p class="hint">Scanned PDFs contain images, not text, and will need OCR first.</p>
+  </div>
+  <div id="pane-url" class="hide">
+    <input type="url" id="url" placeholder="https://example.com/article">
+    <p class="hint">The page is fetched by this machine. Private and loopback addresses are
+      refused.</p>
+  </div>
+  <div id="extract-row" class="hide" style="margin-top:.7rem">
+    <button class="alt" id="extract">Extract text</button>
+    <span class="meta" id="extract-msg"></span>
+  </div>
+
+  <div style="margin-top:1rem">
+    <textarea id="text" placeholder="Akwaaba, wo ho te sɛn?"></textarea>
+    <p class="hint">Code-switched mode reads <code>[bracketed]</code> spans as English inside a
+      Twi frame.</p>
+  </div>
+
+  <div class="row">
+    <label>Voice<select id="voice"></select></label>
+    <label>Language
+      <select id="language">
+        <option value="twi">Twi</option>
+        <option value="mixed">Code-switched</option>
+        <option value="eng">English</option>
+      </select>
+    </label>
+    <label>Speed <span id="speed-val" class="meta"></span>
+      <input type="range" id="speed" min="0.6" max="1.6" step="0.05" value="1.0">
+    </label>
+  </div>
+
+  <div class="row">
+    <button class="go" id="speak">Speak</button>
+    <button class="alt" id="batch">Batch: split into sentences</button>
+    <label style="flex:0 0 auto; font-size:.85rem; color:var(--fg)">
+      <input type="checkbox" id="join" checked style="width:auto"> join into one file
+    </label>
+  </div>
+
+  <div id="out" class="panel hide"></div>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+let VOICES = [];
+
+// Voice labels carry the measured error, because the ranking is the useful part: the two
+// tiers disagree sharply and hours predict neither.
+fetch('/api/voices').then(r => r.json()).then(d => {
+  VOICES = d.voices;
+  $('#voice').innerHTML = VOICES.map(v => {
+    const cs = v.codeswitch_uer != null ? `cs ${(v.codeswitch_uer*100).toFixed(0)}%` : '';
+    const tw = v.twi_only_uer != null ? `twi ${(v.twi_only_uer*100).toFixed(0)}%` : '';
+    return `<option value="${v.name}">${v.name} — ${tw} ${cs} (${v.hours.toFixed(1)} h)</option>`;
+  }).join('');
+});
+
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
+  document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x === t));
+  const src = t.dataset.src;
+  $('#pane-pdf').classList.toggle('hide', src !== 'pdf');
+  $('#pane-url').classList.toggle('hide', src !== 'url');
+  $('#extract-row').classList.toggle('hide', src === 'text');
+});
+
+$('#speed').oninput = e => $('#speed-val').textContent = (1 / e.target.value).toFixed(2) + '×';
+$('#speed').oninput({target: $('#speed')});
+
+function show(html) { const o = $('#out'); o.classList.remove('hide'); o.innerHTML = html; }
+function busy(on) { $('#speak').disabled = on; $('#batch').disabled = on; }
+
+$('#extract').onclick = async () => {
+  const fd = new FormData();
+  const f = $('#pdf').files[0];
+  if (f) fd.append('file', f); else fd.append('url', $('#url').value);
+  $('#extract-msg').textContent = 'extracting…';
+  try {
+    const r = await fetch('/api/extract', {method: 'POST', body: fd});
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || 'failed');
+    $('#text').value = d.text;
+    $('#extract-msg').textContent =
+      `${d.n_chars.toLocaleString()} characters, ${d.n_chunks} sentences — review before speaking`;
+  } catch (e) {
+    $('#extract-msg').innerHTML = `<span class="err">${e.message}</span>`;
+  }
+};
+
+function params() {
+  const fd = new FormData();
+  fd.append('text', $('#text').value);
+  fd.append('voice', $('#voice').value);
+  fd.append('language', $('#language').value);
+  fd.append('length_scale', $('#speed').value);
+  return fd;
+}
+
+$('#speak').onclick = async () => {
+  if (!$('#text').value.trim()) return show('<span class="err">Nothing to say.</span>');
+  busy(true); show('Synthesising…');
+  try {
+    const r = await fetch('/api/speak', {method: 'POST', body: params()});
+    if (!r.ok) throw new Error((await r.json()).detail || 'failed');
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    show(`<audio controls autoplay src="${url}"></audio>
+          <div class="meta">${r.headers.get('X-Duration')}s · ${r.headers.get('X-Phonemes')}
+          phonemes · voice ${r.headers.get('X-Voice')}
+          · <a href="${url}" download="speech.wav">download</a></div>`);
+  } catch (e) { show(`<span class="err">${e.message}</span>`); }
+  busy(false);
+};
+
+$('#batch').onclick = async () => {
+  if (!$('#text').value.trim()) return show('<span class="err">Nothing to say.</span>');
+  busy(true);
+  const fd = params();
+  fd.append('join', $('#join').checked);
+  show('<progress></progress><div class="meta" id="p">starting…</div>');
+  try {
+    const r = await fetch('/api/batch', {method: 'POST', body: fd});
+    const reader = r.body.getReader();
+    const dec = new TextDecoder();
+    let buf = '', last = null;
+    // Progress arrives as newline-delimited JSON: a long document otherwise looks like a hang.
+    while (true) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, {stream: true});
+      const lines = buf.split('\n'); buf = lines.pop();
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        last = JSON.parse(line);
+        if (last.error) throw new Error(last.error);
+        const pct = Math.round(100 * last.done / last.total);
+        $('#out').innerHTML =
+          `<progress value="${last.done}" max="${last.total}"></progress>
+           <div class="meta">${last.done} / ${last.total} sentences · ${last.elapsed || 0}s</div>`;
+      }
+    }
+    if (last && last.token) {
+      const failed = last.failed ? ` · <span class="err">${last.failed} failed</span>` : '';
+      show(`<a class="go" style="text-decoration:none;display:inline-block"
+              href="/api/download/${last.token}">Download ${last.filename}</a>
+            <div class="meta">${last.total} sentences${failed} — the link works once.</div>`);
+    }
+  } catch (e) { show(`<span class="err">${e.message}</span>`); }
+  busy(false);
+};
+</script>
+</html>

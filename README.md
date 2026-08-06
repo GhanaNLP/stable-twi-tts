@@ -76,6 +76,29 @@ asked for. Lower is better; the real-audio floor is 25.9% for Twi.
 **These are epoch-7 samples, not a finished voice.** Twi is solid; English is audibly weaker and
 band-limited to 8 kHz because its training audio was 16 kHz where Twi's was 24 kHz.
 
+## Web interface
+
+A local GUI for people who would rather not use a terminal — and for turning documents into
+speech without writing a script.
+
+```bash
+pip install "git+https://github.com/GhanaNLP/stable-twi-tts#egg=stable-twi-tts[web,twi]"
+stable-twi-tts-web            # http://127.0.0.1:7860
+```
+
+Three ways in — **type text**, **upload a PDF**, or **give a URL** — and two ways out: a single
+clip, or batch mode that splits into sentences and returns one joined wav or a zip of separate
+files with a manifest.
+
+Extraction and synthesis are deliberately separate steps: a PDF or web page becomes editable text
+first, so you can fix a heading, drop a footer or bracket the English before anything is spoken.
+Batch progress streams as it goes, because a 40-page PDF otherwise looks like a hang. The voice
+picker shows each voice's measured error, since that is the part worth choosing on.
+
+It binds to **127.0.0.1** by default. `--host 0.0.0.0` exposes it, and the URL-fetch endpoint then
+makes requests from your machine on a caller's behalf — private, loopback and link-local addresses
+are refused, but do not put this on an untrusted network.
+
 ## Speak something
 
 ```bash
