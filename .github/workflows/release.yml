@@ -1,8 +1,10 @@
 # Publish to PyPI when a version tag is pushed.
 #
 # Uses PyPI Trusted Publishing (OIDC), so there is no API token in this repository's secrets.
-# GitHub mints a short-lived identity token that PyPI verifies against a publisher you configure
-# once at https://pypi.org/manage/project/stable-twi-tts/settings/publishing/ — see PUBLISHING.md.
+# GitHub mints a short-lived identity token that PyPI verifies against a publisher configured once
+# at https://pypi.org/manage/project/stable-twi-tts/settings/publishing/ with owner GhanaNLP, repo
+# stable-twi-tts, workflow release.yml, environment pypi. The first release cannot use this — a
+# trusted publisher cannot be added to a project that does not exist yet, so upload once by hand.
 #
 # Tag and version must agree. A tag of v0.2.0 with `version = "0.1.0"` in pyproject.toml would
 # upload the wrong release and PyPI does not allow re-uploading a version, so the check below
