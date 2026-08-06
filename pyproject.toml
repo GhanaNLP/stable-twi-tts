@@ -52,7 +52,7 @@ Model = "https://huggingface.co/ghanaopendata/stable-twi-tts"
 Demo = "https://ghananlp.github.io/stable-twi-tts/"
 
 [project.scripts]
-stable-twi-tts = "stable_twi_tts.cli:main"
+stable-twi-tts = "stable_twi_tts.cli:_entry"
 stable-twi-tts-web = "stable_twi_tts.web:main"
 
 [tool.setuptools]

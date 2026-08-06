@@ -149,5 +149,23 @@ def main(argv: list[str] | None = None) -> int:
     return 2
 
 
+def _entry(argv: list[str] | None = None) -> int:
+    """Console-script wrapper: turn a missing front-end into a message, not a traceback.
+
+    A PhonemeError means a dependency is absent — ghana-g2p for Twi, espeak-ng for English — and
+    its text already says what to install. Twelve frames of stack above that message make a
+    solvable setup problem look like a crash in the library.
+    """
+    from .g2p import PhonemeError
+    try:
+        return main(argv)
+    except (PhonemeError, FileNotFoundError) as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 1
+    except KeyboardInterrupt:
+        print("interrupted", file=sys.stderr)
+        return 130
+
+
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(_entry())
