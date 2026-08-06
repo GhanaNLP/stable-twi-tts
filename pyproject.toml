@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "stable-twi-tts"
-version = "0.1.1"
+version = "0.2.0"
 description = "Twi and Ghanaian English speech synthesis on ONNX"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -42,10 +42,15 @@ web = [
 # front-end that disagrees with training degrades audio without raising anything — that failure
 # mode cost this project a day at 68.6% phoneme error. Treat a major bump upstream as needing a
 # re-measurement, not as a routine upgrade.
-twi = ["ghana-g2p>=0.1.0"]
+twi = ["ghana-g2p>=0.1.1"]
+# English without a system espeak-ng. Bundles libespeak-ng 1.51 — the version this model was
+# trained on — so the front-end is exact rather than whatever apt happens to ship. Separate from
+# the base install because espeak-ng is GPL-3.0 and this package is MIT: taking on that obligation
+# should be a choice, so English still works via a system espeak-ng if you prefer.
+eng = ["espeak-english>=0.1.0"]
 
 # Everything, minus the dev tools.
-all = ["stable-twi-tts[web,twi]"]
+all = ["stable-twi-tts[web,twi,eng]"]
 
 [project.urls]
 Homepage = "https://github.com/GhanaNLP/stable-twi-tts"

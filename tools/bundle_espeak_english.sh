@@ -35,7 +35,14 @@ D="$WORK/espeak-ng/build/espeak-ng-data"
 for f in phontab phonindex phondata phondata-manifest intonations en_dict; do
     cp "$D/$f" "$OUT/espeak-ng-data/$f"
 done
+# Both `en` and `en-US` are needed, and shipping only `en` is a trap rather than a limitation:
+# espeak_SetVoiceByName("en-us") simply fails, and the obvious recovery — fall back to "en" —
+# is British English. Measured against en-us over 2,000 corpus words, `en` differs on 52.4% of
+# them (nˈəʊ/nˈoʊ, ˈand/ˈænd, fˈɔː/fˈɔːɹ). The model was trained on en-us, and a front-end
+# disagreeing on half its units is precisely the failure that cost this project 68.6% phoneme
+# error once already.
 cp "$D/lang/gmw/en" "$OUT/espeak-ng-data/lang/gmw/en"
+cp "$D/lang/gmw/en-US" "$OUT/espeak-ng-data/lang/gmw/en-US"
 # -a preserves the symlinks: libespeak-ng.so and .so.1 point at the real .so.1.x.y, and a
 # plain cp dereferences all three into full copies, nearly doubling the bundle.
 cp -a "$WORK/espeak-ng/build/src/libespeak-ng/libespeak-ng.so"* "$OUT/"

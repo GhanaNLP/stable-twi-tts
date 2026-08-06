@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import re
 import subprocess
+import warnings
 from functools import lru_cache
 
 PAD, BOS, EOS = "_", "^", "$"
@@ -84,15 +85,65 @@ def twi_phonemes(text: str, dialect: str = "Asante Twi") -> list[str]:
     return [u for u in g.ipa(text, sep=" ", punctuation=True).split(" ") if u]
 
 
-def english_phonemes(text: str, symbols, voice: str = "en-us") -> list[str]:
+TRAINED_ESPEAK_VERSION = "1.51"
+
+
+@lru_cache(maxsize=1)
+def _espeak_english():
+    """The bundled `espeak-english` wheel, or None if not installed.
+
+    Preferred over a system espeak-ng, which inverts the usual "use the real tool" instinct for a
+    concrete reason: `apt install espeak-ng` gives whichever version the distribution ships, and
+    espeak's English is not stable across versions. Relative to the 1.51 this model was trained
+    on, 1.52 inserts a palatalisation mark on 7.1% of a corpus sample and 1.53 shifts `oːɹ` to
+    `ɔːɹ` on 2.4%. The wheel pins 1.51, so it is the exact front-end rather than a nearby one.
+    """
     try:
-        r = subprocess.run(["espeak-ng", "-q", "--ipa", "-v", voice, "--", text],
-                           capture_output=True, text=True, check=True)
-    except FileNotFoundError as e:
+        import espeak_english
+    except ImportError:
+        return None
+    return espeak_english
+
+
+@lru_cache(maxsize=1)
+def _system_espeak_version() -> str | None:
+    try:
+        r = subprocess.run(["espeak-ng", "--version"], capture_output=True, text=True,
+                           check=True, timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    # "eSpeak NG text-to-speech: 1.51  Data at: /usr/lib/..."
+    m = re.search(r":\s*(\d+\.\d+(?:\.\d+)?)", r.stdout)
+    return m.group(1) if m else None
+
+
+def english_phonemes(text: str, symbols, voice: str = "en-us") -> list[str]:
+    """English text to phoneme units, from the same espeak that produced the training targets.
+
+    Prefers the pinned `espeak-english` wheel, then a system `espeak-ng`. The fallback warns when
+    its version is not the trained one: that mismatch is not an error, it is quietly worse audio.
+    """
+    bundled = _espeak_english()
+    if bundled is not None:
+        return tokenize(bundled.phonemes(text, voice), symbols)
+
+    version = _system_espeak_version()
+    if version is None:
         raise PhonemeError(
-            "English needs espeak-ng on PATH. Install with:\n"
-            "  apt install espeak-ng     # or: brew install espeak-ng"
-        ) from e
+            "English needs espeak. Either works; the first is exact:\n"
+            "  pip install 'stable-twi-tts[eng]'   # bundles espeak-ng "
+            f"{TRAINED_ESPEAK_VERSION}, the version this model was trained on\n"
+            "  apt install espeak-ng               # or: brew install espeak-ng")
+    if version != TRAINED_ESPEAK_VERSION:
+        warnings.warn(
+            f"espeak-ng {version} is installed, but this model was trained on "
+            f"{TRAINED_ESPEAK_VERSION}, whose English phonemes differ — 7.1% of words for 1.52, "
+            f"2.4% for 1.53. English will be audibly worse with nothing to indicate why. For the "
+            f"pinned version: pip install 'stable-twi-tts[eng]'",
+            RuntimeWarning, stacklevel=2)
+
+    r = subprocess.run(["espeak-ng", "-q", "--ipa", "-v", voice, "--", text],
+                       capture_output=True, text=True, check=True)
     return tokenize(" ".join(r.stdout.split()), symbols)
 
 

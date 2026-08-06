@@ -15,13 +15,18 @@ Two things it does that a generic TTS wrapper doesn't:
   couldn't pronounce.
 
 ```bash
-pip install "stable-twi-tts[twi]"
-apt install espeak-ng          # or: brew install espeak-ng   (needed for English)
+pip install "stable-twi-tts[twi,eng]"
 ```
 
-The `twi` extra brings the Twi front-end (`ghana-g2p`). `espeak-ng` is a system package, not a
-Python one, and is needed only for English words. Nothing else is required — the model downloads
-itself from a GitHub release over the standard library, checksums verified:
+No system packages, no manual downloads. `twi` brings the Twi front-end (`ghana-g2p`); `eng`
+brings `libespeak-ng 1.51` bundled in a wheel for English words; the model fetches itself from a
+GitHub release over the standard library with checksums verified.
+
+The espeak **version** is pinned deliberately, not incidentally: this model was trained on 1.51,
+and espeak's English changes between releases — 1.52 differs on 7.1% of words, 1.53 on 2.4%.
+A system `espeak-ng` still works if you prefer it, and warns when its version is not 1.51. The
+`eng` extra is separate because espeak-ng is GPL-3.0 while this package is MIT, so taking on that
+obligation should be your choice.
 
 ```bash
 stable-twi-tts --voice twi-6 --text "Akwaaba, wo ho te sɛn?" --out hello.wav
@@ -79,7 +84,7 @@ A local GUI for people who would rather not use a terminal — and for turning d
 speech without writing a script.
 
 ```bash
-pip install "stable-twi-tts[web,twi]"
+pip install "stable-twi-tts[web,twi,eng]"
 stable-twi-tts-web            # http://127.0.0.1:7860
 ```
 
