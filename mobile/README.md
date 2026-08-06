@@ -6,30 +6,50 @@ Python in the pipeline is the **front-end** that turns text into phoneme ids, an
 | step | on device | cost |
 |---|---|---|
 | Twi text → phonemes | port the 42-rule table below | **~30 lines of code** |
-| English text → phonemes | `english_lexicon.json.gz` lookup **or** link `libespeak-ng` | **0.88 MB** or 1.56 MB |
+| English text → phonemes | link `libespeak-ng`, English data only | **1.56 MB** |
 | phonemes → ids | table lookup + wrapping | ~20 lines |
 | ids → audio | onnxruntime Android / iOS | — |
 
-**No native code is required for either language.** Twi is a 42-rule port; English is a shipped
-lookup table. espeak is needed only if you want unlimited English vocabulary.
+Twi is a 42-rule port and needs nothing else. English links `libespeak-ng`, which
+`tools/bundle_espeak_english.sh` reduces from the full 31 MB install to the 1.56 MB English
+actually needs. A lexicon alternative exists for targets that cannot link native code — see below.
 
 For a **Twi-only** app you need no espeak and no lexicon at all: the 42-rule port gives unlimited
 vocabulary. That is strictly better than the sherpa-onnx lexicon route, which caps you at the
 words the lexicon was generated from.
 
-## English: lookup table or library
+## English: link espeak
 
-English cannot be *ported* the way Twi can, but it does not have to be — the pronunciations can be
-computed once, here, and shipped as data:
+English cannot be *ported* the way Twi can, so link the library:
+
+```bash
+tools/bundle_espeak_english.sh espeak-english     # builds and strips to 1.56 MB
+```
+
+```
+libespeak-ng.so.1.53.0   715 KB      phondata           600 KB
+en_dict                  182 KB      phontab             64 KB
+phonindex                 49 KB      phondata-manifest   23 KB
+intonations                3 KB      lang/gmw/en        140 B
+                                     TOTAL             1.56 MB
+```
+
+Verified working from the bundle alone. Point `ESPEAK_DATA_PATH` at `espeak-ng-data/` and call
+espeak with IPA output.
 
 | | size | vocabulary | needs |
 |---|---|---|---|
-| **`english_lexicon.json.gz`** | **0.88 MB** | **98.2% of tokens** | nothing |
-| `libespeak-ng` + en data | 1.56 MB | unlimited | native linking |
+| **`libespeak-ng` + en data** | **1.56 MB** | **unlimited** | native linking |
+| `english_lexicon.json.gz` | 0.88 MB | 98.2% of tokens | nothing |
 
-The lexicon is both **smaller and simpler**, so prefer it unless you need to pronounce arbitrary
-words. It holds 124,926 words, already tokenised into the model's units — split on spaces, do not
-re-tokenise:
+**Link the library.** The 0.68 MB saved by the lexicon is not worth silently dropping words —
+and what it drops is exactly what matters: proper nouns, inflections, anything coined recently.
+The lexicon is the fallback for targets where native linking is impossible (a pure-JS or
+sandboxed runtime), not the default.
+
+### The lexicon fallback
+
+124,926 words, already tokenised into the model's units — split on spaces, do not re-tokenise:
 
 ```json
 {"computer": "k ə m p j ˈ uː ɾ ɚ", "ghana": "ɡ ˈ ɑ ː n ə", ...}
@@ -41,8 +61,12 @@ what remains missing is mostly ASR noise (`dignityity`), Ghanaian proper nouns (
 possessives (`bia's`). Add your own domain vocabulary with
 `tools/build_english_lexicon.py --extra-words`.
 
-Words absent from the lexicon **cannot be pronounced** and must be skipped or spelled out. If that
-is unacceptable, link the library.
+Words absent from the lexicon **cannot be pronounced** and must be skipped or spelled out — which
+is why it is the fallback rather than the default.
+
+**Licence note:** espeak-ng is GPL-3.0, so linking it into an application carries obligations that
+shipping a generated lexicon does not. That is a genuine reason to prefer the lexicon in some
+projects, independent of size.
 
 ### espeak is still the source of truth
 

@@ -216,15 +216,15 @@ Note that the *accent* lives in the audio, not the symbols. English input is can
 | path | phoneme error | needs |
 |---|---|---|
 | **Python + onnxruntime** | **30.2%** | Python, ghana-g2p, espeak-ng for English — unlimited vocabulary |
-| **Native port, no espeak** | matches Python | ~30 lines + a 0.88 MB English lexicon — no Python, no native linking |
-| Native port + `libespeak-ng` | matches Python | ~30 lines + 1.56 MB — adds unlimited English vocabulary |
+| **Native port + `libespeak-ng`** | matches Python | ~30 lines + 1.56 MB — no Python, unlimited vocabulary |
 
 The native path exists because the Python dependency is only the *front-end*, and Twi's
 grapheme-to-phoneme is a **42-entry longest-match table** — verified identical to ghana-g2p across
 20,000 words. So a Twi-only app needs no Python, no espeak and no lexicon. English cannot be ported that way (7,132
-context rules plus 5,794 exceptions), but it does not need to be: `mobile/english_lexicon.json.gz`
-holds 124,926 precomputed pronunciations in 0.88 MB and covers **98.2% of tokens** in real text.
-Link `libespeak-ng` (1.56 MB) only if you need unlimited English vocabulary.
+context rules plus 5,794 exceptions), so it links `libespeak-ng` — `tools/bundle_espeak_english.sh`
+strips the 31 MB install down to the **1.56 MB** English needs, verified working. For targets that
+cannot link native code, `mobile/english_lexicon.json.gz` holds 124,926 precomputed pronunciations
+in 0.88 MB, covering 98.2% of tokens but dropping the rest.
 
 `mobile/` has Kotlin and Swift references plus **13 test vectors**, so a port is verified rather
 than hoped-for. Those vectors are worth taking seriously: writing them caught two bugs in the
