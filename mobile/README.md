@@ -47,6 +47,25 @@ and what it drops is exactly what matters: proper nouns, inflections, anything c
 The lexicon is the fallback for targets where native linking is impossible (a pure-JS or
 sandboxed runtime), not the default.
 
+**And coverage is not the only gap — measured, not assumed.** Comparing the lexicon against
+`espeak-ng -q --ipa -v en-us` directly:
+
+| | lexicon vs espeak |
+|---|---|
+| single words (3,000 sampled) | **5.7% differ** |
+| whole sentences | **every one differs** |
+
+Two separate causes. Single-word differences are espeak's own context rules firing on a word in
+isolation versus in a list (`mentors` → `mˈɛntɔːɹz` vs `mˈɛntoːɹz`, `wealthiest` →
+`wˈɛlθiʲɪst` vs `wˈɛlθiɪst`). Sentences differ for a deeper reason: espeak reduces function words
+in context, so *to* is `tə` not `tˈuː`, *the* is `ðə` not `ðˈə`, and *and* loses its stress
+entirely. A per-word lexicon cannot know it is in a sentence, so it stresses every word.
+
+The model was trained on espeak's sentence-level output. A front-end that stresses every function
+word is a front-end that disagrees with training on most utterances — the same class of mismatch
+that produced 68.6% phoneme error here once already. So the lexicon is genuinely a last resort:
+correct enough for isolated words, measurably wrong for connected speech.
+
 ### The lexicon fallback
 
 124,926 words, already tokenised into the model's units — split on spaces, do not re-tokenise:
