@@ -260,8 +260,13 @@ ranking by clips would systematically flatter Twi speakers.
 ## Honest status
 
 - **Not on PyPI.** Install from git; the package name is not registered yet.
-- **The model is epoch 7 of a run that was stopped early**, not a converged model. `val_mos` was
-  still climbing (2.56 → 3.02) when training stopped. A longer run should be better.
+- **The model is epoch 7, the best checkpoint of a run that had plateaued.** `val_mos` rose
+  steeply for three epochs (2.56 → 2.99) and then oscillated between 2.75 and 3.02 for six more
+  with no upward trend; `val_mel` improved 0.005 across the same span and then reversed. Epoch 7's
+  3.02 is the peak, but epoch 3's 2.99 is within noise of it. **More training at this data scale
+  is unlikely to help** — the round-trip numbers agree, with Twi drifting slightly worse (31.3% →
+  33.5%) while English improved (63.7% → 59.5%), i.e. the model trading between languages rather
+  than improving. The gains left are in the data, not the schedule.
 - **The Kotlin and Swift ports have not been compiled** — the algorithm is verified against test
   vectors, but no one has built them on a device yet.
 - **English is markedly weaker than Twi** and this is a data problem, not a tuning one: English had
