@@ -6,13 +6,54 @@ Python in the pipeline is the **front-end** that turns text into phoneme ids, an
 | step | on device | cost |
 |---|---|---|
 | Twi text → phonemes | port the 42-rule table below | **~30 lines of code** |
-| English text → phonemes | link `libespeak-ng`, English data only | **1.56 MB** |
+| English text → phonemes | `english_lexicon.json.gz` lookup **or** link `libespeak-ng` | **0.88 MB** or 1.56 MB |
 | phonemes → ids | table lookup + wrapping | ~20 lines |
 | ids → audio | onnxruntime Android / iOS | — |
+
+**No native code is required for either language.** Twi is a 42-rule port; English is a shipped
+lookup table. espeak is needed only if you want unlimited English vocabulary.
 
 For a **Twi-only** app you need no espeak and no lexicon at all: the 42-rule port gives unlimited
 vocabulary. That is strictly better than the sherpa-onnx lexicon route, which caps you at the
 words the lexicon was generated from.
+
+## English: lookup table or library
+
+English cannot be *ported* the way Twi can, but it does not have to be — the pronunciations can be
+computed once, here, and shipped as data:
+
+| | size | vocabulary | needs |
+|---|---|---|---|
+| **`english_lexicon.json.gz`** | **0.88 MB** | **98.2% of tokens** | nothing |
+| `libespeak-ng` + en data | 1.56 MB | unlimited | native linking |
+
+The lexicon is both **smaller and simpler**, so prefer it unless you need to pronounce arbitrary
+words. It holds 124,926 words, already tokenised into the model's units — split on spaces, do not
+re-tokenise:
+
+```json
+{"computer": "k ə m p j ˈ uː ɾ ɚ", "ghana": "ɡ ˈ ɑ ː n ə", ...}
+```
+
+Coverage was measured on real Ghanaian English broadcast text, not asserted: **98.2% of tokens,
+85% of types**. The gap between those two numbers is the point — the misses are rare words, and
+what remains missing is mostly ASR noise (`dignityity`), Ghanaian proper nouns (`takoradi`) and
+possessives (`bia's`). Add your own domain vocabulary with
+`tools/build_english_lexicon.py --extra-words`.
+
+Words absent from the lexicon **cannot be pronounced** and must be skipped or spelled out. If that
+is unacceptable, link the library.
+
+### espeak is still the source of truth
+
+The lexicon was generated *by* espeak-ng, once. That is not incidental: the model was trained on
+`espeak-ng -v en-us --ipa` output, so pronunciations from any other source — CMUdict's ARPAbet, a
+different synthesiser, a hand-written table — would be *different phonemes* and reintroduce a
+train/inference mismatch. That mismatch is not theoretical: at 51% disagreement it produced 68.6%
+phoneme error where Twi scored 25.6%, with nothing raising an error.
+
+So espeak is a build-time dependency for whoever regenerates the lexicon, and no dependency at all
+for whoever ships the app.
 
 ## Why Twi ports and English doesn't
 
