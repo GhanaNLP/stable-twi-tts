@@ -16,12 +16,17 @@ Two things it does that a generic TTS wrapper doesn't:
 
 ```bash
 # Not on PyPI yet — install from source:
-pip install "git+https://github.com/GhanaNLP/stable-twi-tts#egg=stable-twi-tts[hub,twi]"
+pip install "git+https://github.com/GhanaNLP/stable-twi-tts#egg=stable-twi-tts[hub]"
+
+# Twi text needs ghana-g2p, which is not on PyPI and so cannot be an extra:
+pip install git+https://github.com/AfriSpeech/africa-g2p \
+            git+https://github.com/GhanaNLP/ghana-g2p
+
 apt install espeak-ng          # or: brew install espeak-ng   (needed for English)
 ```
 
-The `twi` extra pulls ghana-g2p from source, because its wheel build is broken upstream. The
-`hub` extra lets the model download itself:
+ghana-g2p is a separate line because PyPI forbids a published package from depending on a git URL,
+and africa-g2p has no working wheel upstream. The `hub` extra lets the model download itself:
 
 ```bash
 stable-twi-tts --voice twi-6 --text "Akwaaba, wo ho te sɛn?" --out hello.wav
@@ -82,7 +87,9 @@ A local GUI for people who would rather not use a terminal — and for turning d
 speech without writing a script.
 
 ```bash
-pip install "git+https://github.com/GhanaNLP/stable-twi-tts#egg=stable-twi-tts[web,twi]"
+pip install "git+https://github.com/GhanaNLP/stable-twi-tts#egg=stable-twi-tts[web]"
+pip install git+https://github.com/AfriSpeech/africa-g2p \
+            git+https://github.com/GhanaNLP/ghana-g2p
 stable-twi-tts-web            # http://127.0.0.1:7860
 ```
 

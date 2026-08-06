@@ -9,6 +9,18 @@ description = "Twi and Ghanaian English speech synthesis on ONNX"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
+authors = [{ name = "GhanaNLP" }]
+keywords = ["twi", "akan", "ghana", "tts", "speech-synthesis", "ipa", "onnx", "code-switching"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Natural Language :: English",
+]
 dependencies = [
     "onnxruntime>=1.16",
     "numpy>=1.21",
@@ -22,12 +34,22 @@ web = [
     "fastapi>=0.110", "uvicorn>=0.27", "python-multipart>=0.0.9",
     "huggingface_hub>=0.24", "pypdf>=4.0", "trafilatura>=1.8",
 ]
-# Twi needs ghana-g2p. Its own wheel build is currently broken upstream (africa-g2p ships
-# data/ twice, so hatchling refuses the archive), hence the direct git references.
-twi = [
-    "africa-g2p @ git+https://github.com/AfriSpeech/africa-g2p",
-    "ghana-g2p @ git+https://github.com/GhanaNLP/ghana-g2p",
-]
+
+# There is deliberately no `twi` extra. Twi text needs ghana-g2p, which is not on PyPI, and PyPI
+# rejects any distribution whose metadata carries a direct URL ("Can't have direct dependency") —
+# so an extra pointing at git+https would make this package unpublishable. Install it separately:
+#
+#   pip install git+https://github.com/AfriSpeech/africa-g2p \
+#               git+https://github.com/GhanaNLP/ghana-g2p
+#
+# Both are needed; africa-g2p's own wheel build is broken upstream (it ships data/ twice, so
+# hatchling refuses the archive), which is why it is a git reference rather than a version.
+
+[project.urls]
+Homepage = "https://github.com/GhanaNLP/stable-twi-tts"
+Source = "https://github.com/GhanaNLP/stable-twi-tts"
+Model = "https://huggingface.co/ghanaopendata/stable-twi-tts"
+Demo = "https://ghananlp.github.io/stable-twi-tts/"
 
 [project.scripts]
 stable-twi-tts = "stable_twi_tts.cli:main"

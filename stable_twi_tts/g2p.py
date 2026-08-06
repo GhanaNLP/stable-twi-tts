@@ -69,9 +69,10 @@ def _twi_engine(dialect: str):
         from ghana_g2p import GhanaG2P
     except ImportError as e:  # pragma: no cover
         raise PhonemeError(
-            "Twi needs ghana-g2p. Install with:\n"
-            "  pip install 'stable-twi-tts[twi]'\n"
-            "or from source (its wheel build is currently broken):\n"
+            "Twi needs ghana-g2p, which is not on PyPI. Install it directly:\n"
+            "  pip install git+https://github.com/AfriSpeech/africa-g2p \\\n"
+            "              git+https://github.com/GhanaNLP/ghana-g2p\n"
+            "or from source (africa-g2p's wheel build is currently broken):\n"
             "  git clone https://github.com/AfriSpeech/africa-g2p\n"
             "  git clone https://github.com/GhanaNLP/ghana-g2p\n"
             "  export PYTHONPATH=africa-g2p/src:ghana-g2p/src"
